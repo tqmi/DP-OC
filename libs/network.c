@@ -7,13 +7,19 @@
 #include <arpa/inet.h>
 #include <string.h>
 
+#define SERVER 0
+#define CLIENT 1
+
 char ** data;
 struct pollfd* connectionfd;
 struct pollfd* clientsfd;
 int nclientsfd;
+int conn_type;
 
-void initialize_network(){
+void initialize_network(int type){
+	conn_type = type;
 	connectionfd = (struct pollfd *) malloc(sizeof(struct pollfd));
+	
 }
 
 int read_data(){
@@ -28,7 +34,12 @@ int read_data(){
 		{
 			if (clientsfd[i].revents)
 			{
-				read(clientsfd[i].fd,buffer,1024);
+				// printf("%d ",clientsfd[i].revents);
+				if(read(clientsfd[i].fd,buffer,1024) <= 0){
+					clientsfd[i].fd = -1;
+					clientsfd[i].revents = 0;
+					printf("client disconnected\n");
+				}
 				printf(buffer);
 				fflush(stdout);
 			}
@@ -59,14 +70,22 @@ int accept_connections(){
     	{
 			return 2;
     	} 
-
-		clientsfd = (struct pollfd *) realloc(clientsfd , (++nclientsfd) * sizeof(struct pollfd));
-		if(clientsfd == NULL){
-			return 3;
+		int space_found = 0;
+		for(int i = 1 ; i <= nclientsfd ; i++){
+			if(clientsfd[i].fd < 0){
+				space_found = 1;
+				clientsfd[i].fd = new_client_socket;
+				clientsfd[nclientsfd-1].events = POLLIN; 
+			}
 		}
-
-		clientsfd[nclientsfd-1].fd = new_client_socket; 
-		clientsfd[nclientsfd-1].events = POLLIN; 
+		if(!space_found){
+			clientsfd = (struct pollfd *) realloc(clientsfd , (++nclientsfd) * sizeof(struct pollfd));
+			if(clientsfd == NULL){
+				return 3;
+			}
+			clientsfd[nclientsfd-1].fd = new_client_socket; 
+			clientsfd[nclientsfd-1].events = POLLIN;
+		} 
 		
 	}
 	return 0;

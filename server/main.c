@@ -5,7 +5,7 @@
 int main(int argc, char const *argv[])
 {
 	int sock;
-	initialize_network();
+	initialize_network(SERVER);
 	initialize_socket(PORT,10,&sock);
 	while(1){
 		accept_connections();

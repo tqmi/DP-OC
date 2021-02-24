@@ -1,6 +1,8 @@
 #if !defined(NETWORK_H_INCLUDED)
 #define NETWORK_H_INCLUDED
-void initialize_network();
+#define SERVER 0
+#define CLIENT 1
+void initialize_network(int type);
 int read_data();
 int write_data(int sockfd,char * data);
 int accept_connections();

@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include "logic.h"
 
 #define empty 0
@@ -20,6 +21,15 @@
 
 void resizeCoord(int *x1, int *y1, int *x2, int *y2);
 int basicCheck(int x1, int y1, int x2, int y2);
+int advancedCheck(int x1, int y1, int x2, int y2);
+int pawnCheck(int x1, int y1, int x2, int y2);
+int blackPawnCheck(int x1, int y1, int x2, int y2);
+int whitePawnCheck(int x1, int y1, int x2, int y2);
+int knightCheck(int x1, int y1, int x2, int y2);
+int bishopCheck(int x1, int y1, int x2, int y2);
+int rookCheck(int x1, int y1, int x2, int y2);
+int queenCheck(int x1, int y1, int x2, int y2);
+int kingCheck(int x1, int y1, int x2, int y2);
 
 int board[8][8];
 
@@ -59,8 +69,29 @@ void getBoard(int auxBoard[8][8])
     memcpy(auxBoard, board, 8 * 8 * sizeof(int));
 }
 
+//for testing
+void printBoard(int board[8][8])
+{
+    for (int i = 7; i >= 0; i--)
+    {
+        for (int j = 0; j < 8; j++)
+        {
 
+            if (board[j][i] < 0)
+                printf(" %d", board[j][i]);
+            else
+                printf("  %d", board[j][i]);
+        }
 
+        printf(" |%d\n", i + 1);
+    }
+    for (int j = 0; j < 8; j++)
+        printf("  _");
+    printf("\n");
+    for (int j = 0; j < 8; j++)
+        printf("  %d", j + 1);
+    printf("\n");
+}
 
 //returns 0 on invalid move, otherwise returns 1
 // x1,y1 - initial position, can have values between [1,8]
@@ -71,8 +102,10 @@ int movePiece(int x1, int y1, int x2, int y2)
     if (!basicCheck(x1, y1, x2, y2))
         return 0;
 
-    int pieceType = board[x1][y1];
+    if (!advancedCheck(x1, y1, x2, y2))
+        return 0;
 
+    int pieceType = board[x1][y1];
     board[x2][y2] = pieceType;
     board[x1][y1] = 0;
 
@@ -107,7 +140,6 @@ int basicCheck(int x1, int y1, int x2, int y2)
     {
         int pieceColorStart = (board[x1][y1] > 0) ? 1 : -1; //1 white, -1 black
         int pieceColorEnd = (board[x2][y2] > 0) ? 1 : -1;
-        
 
         if (pieceColorStart == pieceColorEnd)
             return 0;
@@ -116,24 +148,188 @@ int basicCheck(int x1, int y1, int x2, int y2)
     return 1;
 }
 
-//for testing
-void printBoard(int board[8][8])
+//takes into account :
+//-the type of the piece
+//-whether its path is blocked
+int advancedCheck(int x1, int y1, int x2, int y2)
 {
-    for (int i = 7; i >= 0; i--)
+    int pieceType = board[x1][y1];
+
+    switch (pieceType)
     {
-        for (int j = 0; j < 8; j++)
-        {
+    case -1:
+    case 1:
+        if (!pawnCheck(x1, y1, x2, y2))
+            return 0;
+        break;
 
-            if (board[j][i] < 0)
-                printf(" %d", board[j][i]);
-            else
-                printf("  %d", board[j][i]);
-        }
+    case -2:
+    case 2:
+        if (!knightCheck(x1, y1, x2, y2))
+            return 0;
+        break;
 
-        printf(" |%d\n",i+1);
-    } 
-    for (int j = 0; j < 8; j++) printf("  _");
-    printf("\n");
-    for (int j = 0; j < 8; j++) printf("  %d",j+1);
-    printf("\n");
+    case -3:
+    case 3:
+        if (!bishopCheck(x1, y1, x2, y2))
+            return 0;
+        break;
+
+    case -4:
+    case 4:
+        if (!rookCheck(x1, y1, x2, y2))
+            return 0;
+        break;
+
+    case -5:
+    case 5:
+        if (!queenCheck(x1, y1, x2, y2))
+            return 0;
+        break;
+
+    case -6:
+    case 6:
+        if (!kingCheck(x1, y1, x2, y2))
+            return 0;
+        break;
+
+    default:
+        return 0;
+    }
+
+    return 1;
+}
+
+int pawnCheck(int x1, int y1, int x2, int y2)
+{
+    int pawnColor = board[x1][y1];
+
+    if (pawnColor > 0)
+        return whitePawnCheck(x1, y1, x2, y2);
+    else
+        return blackPawnCheck(x1, y1, x2, y2);
+}
+
+int whitePawnCheck(int x1, int y1, int x2, int y2)
+{
+
+    int xDiff = x1 - x2;
+    int yDiff = y1 - y2;
+
+    if (yDiff == -2 && xDiff == 0 && y1 == 1) //moving 2 sqares
+    {
+        if (board[x1][y1 + 1] == 0 && board[x1][y1 + 2] == 0)
+            return 1;
+        else
+            return 0;
+    }
+
+    if (abs(xDiff) == 1 && yDiff == -1) //taking a piece
+    {
+        if (board[x2][y2] < 0)
+            return 1;
+        else
+            return 0;
+    }
+
+    if (yDiff == -1 && board[x1][y1 + 1] == 0)
+        return 1;
+    else
+        return 0;
+
+    if (abs(xDiff) > 0)
+        return 0;
+    if (yDiff < -1)
+        return 0;
+    if (yDiff > 0)
+        return 0;
+
+    return 1;
+}
+
+int blackPawnCheck(int x1, int y1, int x2, int y2)
+{
+    int xDiff = x1 - x2;
+    int yDiff = y1 - y2;
+
+    if (yDiff == 2 && xDiff == 0 && y1 == 6) //moving 2 sqares
+    {
+        if (board[x1][y1 - 1] == 0 && board[x1][y1 - 2] == 0)
+            return 1;
+        else
+            return 0;
+    }
+
+    if (abs(xDiff) == 1 && yDiff == 1) //taking a piece
+    {
+        if (board[x2][y2] > 0)
+            return 1;
+        else
+            return 0;
+    }
+
+    if (yDiff == 1 && board[x1][y1 - 1] == 0)
+        return 1;
+    else
+        return 0;
+
+    if (abs(xDiff) > 0)
+        return 0;
+    if (yDiff > 1)
+        return 0;
+    if (yDiff < 0)
+        return 0;
+
+    return 1;
+}
+
+int knightCheck(int x1, int y1, int x2, int y2)
+{
+    //posible knight moves
+    int X[8] = {2, 1, -1, -2, -2, -1, 1, 2};
+    int Y[8] = {1, 2, 2, 1, -1, -2, -2, -1};
+
+    int xDiff = x1 - x2;
+    int yDiff = y1 - y2;
+    for (int i = 0; i < 8; i++)
+        if (yDiff == Y[i] && xDiff == X[i])
+            return 1;
+
+    return 0;
+}
+
+int bishopCheck(int x1, int y1, int x2, int y2)
+{
+    int xDiff = x1 - x2;
+    int yDiff = y1 - y2;
+
+    if (abs(xDiff) != abs(yDiff)) return 0;
+
+    int xAux = xDiff / abs(xDiff);
+    int yAux = yDiff / abs(yDiff);
+
+    int j = y2;
+    for (int i = x2+xAux; i != x1; i += xAux)
+    {
+        j += yAux;
+        if (board[i][j] != 0) return 0;
+
+    }
+
+    return 1;
+}
+
+int rookCheck(int x1, int y1, int x2, int y2)
+{
+    return 1;
+}
+
+int queenCheck(int x1, int y1, int x2, int y2)
+{
+    return 1;
+}
+
+int kingCheck(int x1, int y1, int x2, int y2)
+{
+    return 1;
 }

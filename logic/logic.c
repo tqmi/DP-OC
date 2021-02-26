@@ -107,6 +107,7 @@ void printBoard(int board[8][8])
 //returns 0 on invalid move
 //returns 1 for valid move
 //returns 2 for valid move with check
+//returns 3 for valid move with mate
 // x1,y1 - initial position, can have values between [1,8]
 // x2,y2 - new position
 int movePiece(int x1, int y1, int x2, int y2)
@@ -504,45 +505,3 @@ int testMove(int x1, int y1, int x2, int y2)
     return 1;
 }
 
-//for testing
-int main()
-{
-    setStartingBoard();
-
-    int auxBoard[8][8];
-    getBoard(auxBoard);
-    printBoard(auxBoard);
-
-    int x1, x2, y1, y2;
-
-    int x;
-    do
-    {
-        if (getPlayerTurn() > 0)
-            printf("WHITE TURN\n");
-        else
-            printf("BLACK TURN\n");
-        printf("Pick piece: ");
-        scanf("%d", &x1);
-        scanf("%d", &y1);
-        printf("Pick move: ");
-        scanf("%d", &x2);
-        scanf("%d", &y2);
-        printf("\n\n\n");
-
-        x = movePiece(x1, y1, x2, y2);
-
-        getBoard(auxBoard);
-        printBoard(auxBoard);
-
-        if (x == 0)
-            printf("BAD MOVE\n");
-        else if (x == 2)
-            printf("CHEKED\n");
-        else if (x == 3)
-            printf("MATE\n");
-
-    } while (x!=3);
-
-    return 0;
-}

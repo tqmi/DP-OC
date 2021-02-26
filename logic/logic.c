@@ -20,8 +20,10 @@
 #define wK 6
 
 void resizeCoord(int *x1, int *y1, int *x2, int *y2);
+
+int fullCheck(int x1, int y1, int x2, int y2);
 int basicCheck(int x1, int y1, int x2, int y2);
-int advancedCheck(int x1, int y1, int x2, int y2);
+
 int pawnCheck(int x1, int y1, int x2, int y2);
 int blackPawnCheck(int x1, int y1, int x2, int y2);
 int whitePawnCheck(int x1, int y1, int x2, int y2);
@@ -30,6 +32,10 @@ int bishopCheck(int x1, int y1, int x2, int y2);
 int rookCheck(int x1, int y1, int x2, int y2);
 int queenCheck(int x1, int y1, int x2, int y2);
 int kingCheck(int x1, int y1, int x2, int y2);
+
+int isBlackKingChecked();
+int isWhiteKingChecked();
+int isKingChecked();
 
 int board[8][8];
 int playerTurn;
@@ -102,10 +108,12 @@ void printBoard(int board[8][8])
 int movePiece(int x1, int y1, int x2, int y2)
 {
     resizeCoord(&x1, &y1, &x2, &y2);
-    if (!basicCheck(x1, y1, x2, y2))
+
+    if (!fullCheck(x1, y1, x2, y2))
         return 0;
 
-    if (!advancedCheck(x1, y1, x2, y2))
+    //in case a player tries to move the enemies pieces
+    if (board[x1][y1] * playerTurn < 0)
         return 0;
 
     int pieceType = board[x1][y1];
@@ -113,6 +121,8 @@ int movePiece(int x1, int y1, int x2, int y2)
     board[x1][y1] = 0;
 
     playerTurn *= -1;
+
+    if(isKingChecked()) return 2;
 
     return 1;
 }
@@ -132,7 +142,31 @@ void resizeCoord(int *x1, int *y1, int *x2, int *y2)
     *y2 -= 1;
 }
 
-//checks general things that are valid for all pieces
+//combines all checks into one
+int fullCheck(int x1, int y1, int x2, int y2)
+{
+    if (!basicCheck(x1, y1, x2, y2))
+        return 0;
+
+
+    //checks if the king will still be checked after making the move
+    int pieceType = board[x1][y1];
+    board[x2][y2] = pieceType;
+    board[x1][y1] = 0;
+    if(isKingChecked())
+    {
+        board[x2][y2] = 0;
+        board[x1][y1] = pieceType;
+        return 0;
+    }
+    board[x2][y2] = 0;
+    board[x1][y1] = pieceType;
+
+    return 1;
+}
+
+//checks general things that are valid for all pieces(not empty piece, boundaries)
+//and more advanced things(if path of piece is not blocked)
 // return 0 on incorrect imput, 1 otherwise
 int basicCheck(int x1, int y1, int x2, int y2)
 {
@@ -146,10 +180,6 @@ int basicCheck(int x1, int y1, int x2, int y2)
     if (board[x1][y1] == 0)
         return 0;
 
-    //in case a player tries to move the enemies pieces
-    if (board[x1][y1] * playerTurn < 0)
-        return 0;
-
     //not ending on same color piece check
     if (board[x2][y2] != 0)
     {
@@ -159,15 +189,6 @@ int basicCheck(int x1, int y1, int x2, int y2)
         if (pieceColorStart == pieceColorEnd)
             return 0;
     }
-
-    return 1;
-}
-
-//takes into account :
-//-the type of the piece
-//-whether its path is blocked
-int advancedCheck(int x1, int y1, int x2, int y2)
-{
     int pieceType = board[x1][y1];
 
     switch (pieceType)
@@ -381,4 +402,105 @@ int kingCheck(int x1, int y1, int x2, int y2)
         return 0;
     else
         return queenCheck(x1, y1, x2, y2);
+}
+
+//-1 color for black, 1 for white
+void findKing(int color, int *kX, int *kY)
+{
+    for (int i = 0; i < 8; i++)
+        for (int j = 0; j < 8; j++)
+            if (board[j][i] == 6 * color)
+            {
+                *kX = j;
+                *kY = i;
+                return;
+            }
+}
+
+//returns 1 if king is checked, 0 otherwise
+int isWhiteKingChecked()
+{
+    int kX, kY; //king location
+    findKing(1, &kX, &kY);
+
+    for (int i = 0; i < 8; i++)
+        for (int j = 0; j < 8; j++)
+            if (basicCheck(j, i, kX, kY))
+                return 1;
+
+    return 0;
+}
+
+//returns 1 if king is checked, 0 otherwise
+int isBlackKingChecked()
+{
+    int kX, kY; //king location
+    findKing(-1, &kX, &kY);
+
+    for (int i = 7; i >= 0; i--)
+        for (int j = 0; j < 8; j++)
+            if (basicCheck(j, i, kX, kY))
+                return 1;
+
+    return 0;
+}
+
+int isKingChecked()
+{
+    if (getPlayerTurn() > 0)
+        return isWhiteKingChecked();
+    else
+        return isBlackKingChecked();
+}
+
+int testMove(int x1, int y1, int x2, int y2)
+{
+    resizeCoord(&x1, &y1, &x2, &y2);
+    playerTurn *= -1;
+    int pieceType = board[x1][y1];
+    board[x2][y2] = pieceType;
+    board[x1][y1] = 0;
+    return 1;
+}
+
+
+//for testing
+int main()
+{
+    setStartingBoard();
+
+    int auxBoard[8][8];
+    getBoard(auxBoard);
+    printBoard(auxBoard);
+
+    int x1, x2, y1, y2;
+
+    int x;
+    do
+    {
+        if (getPlayerTurn() > 0)
+            printf("WHITE TURN\n");
+        else
+            printf("BLACK TURN\n");
+        printf("Pick piece: ");
+        scanf("%d", &x1);
+        scanf("%d", &y1);
+        printf("Pick move: ");
+        scanf("%d", &x2);
+        scanf("%d", &y2);
+        printf("\n\n\n");
+
+        x = movePiece(x1, y1, x2, y2);
+
+        getBoard(auxBoard);
+        printBoard(auxBoard);
+
+        if (x == 0)
+            printf("BAD MOVE\n");
+        else if (x==2)
+            printf("CHEKED\n");
+
+    } while (1);
+
+    return 0;
 }

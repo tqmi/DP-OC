@@ -25,9 +25,12 @@ void setStartingBoard();
 void getBoard(int auxBoard[8][8]);
 
 //returns 0 on invalid move, otherwise returns 1
-// x1,y1 - initial position, can have values between [1,8]
+// x1,y1 - initial position
 // x2,y2 - new position
 int movePiece(int x1, int y1, int x2, int y2);
+
+//return 1 if its white's turn and -1 for black
+int getPlayerTurn();
 
 //a basic print of the board
 //for testing, should be removed in the future

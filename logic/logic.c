@@ -32,6 +32,7 @@ int queenCheck(int x1, int y1, int x2, int y2);
 int kingCheck(int x1, int y1, int x2, int y2);
 
 int board[8][8];
+int playerTurn;
 
 void setStartingBoard()
 {
@@ -61,6 +62,8 @@ void setStartingBoard()
     //Kings
     board[3][0] = wK;
     board[3][7] = bK;
+
+    playerTurn = 1;
 }
 
 //copies the board into the board given as a parameter
@@ -109,7 +112,15 @@ int movePiece(int x1, int y1, int x2, int y2)
     board[x2][y2] = pieceType;
     board[x1][y1] = 0;
 
+    playerTurn *= -1;
+
     return 1;
+}
+
+//return 1 if its white's turn and -1 for black
+int getPlayerTurn()
+{
+    return playerTurn;
 }
 
 //makes the coord from user frendly to array frendly
@@ -133,6 +144,10 @@ int basicCheck(int x1, int y1, int x2, int y2)
 
     //non empty start check
     if (board[x1][y1] == 0)
+        return 0;
+
+    //in case a player tries to move the enemies pieces
+    if (board[x1][y1] * playerTurn < 0)
         return 0;
 
     //not ending on same color piece check
@@ -303,17 +318,19 @@ int bishopCheck(int x1, int y1, int x2, int y2)
     int xDiff = x1 - x2;
     int yDiff = y1 - y2;
 
-    if (abs(xDiff) != abs(yDiff)) return 0;
+    if (abs(xDiff) != abs(yDiff))
+        return 0;
 
     int xAux = xDiff / abs(xDiff);
     int yAux = yDiff / abs(yDiff);
 
+    //checking for pieces blocking the way
     int j = y2;
-    for (int i = x2+xAux; i != x1; i += xAux)
+    for (int i = x2 + xAux; i != x1; i += xAux)
     {
         j += yAux;
-        if (board[i][j] != 0) return 0;
-
+        if (board[i][j] != 0)
+            return 0;
     }
 
     return 1;
@@ -321,15 +338,47 @@ int bishopCheck(int x1, int y1, int x2, int y2)
 
 int rookCheck(int x1, int y1, int x2, int y2)
 {
+    int xDiff = x1 - x2;
+    int yDiff = y1 - y2;
+
+    if (xDiff == 0)
+    {
+        int yAux = yDiff / abs(yDiff);
+        for (int i = y2 + yAux; i != y1; i += yAux)
+            if (board[x1][i] != 0)
+                return 0;
+    }
+    else if (yDiff == 0)
+    {
+        int xAux = xDiff / abs(xDiff);
+        for (int i = x2 + xAux; i != x1; i += xAux)
+            if (board[i][y1] != 0)
+                return 0;
+    }
+    else
+        return 0;
+
     return 1;
 }
 
 int queenCheck(int x1, int y1, int x2, int y2)
 {
-    return 1;
+    int xDiff = x1 - x2;
+    int yDiff = y1 - y2;
+
+    if (xDiff == 0 || yDiff == 0)
+        return rookCheck(x1, y1, x2, y2);
+    else
+        return bishopCheck(x1, y1, x2, y2);
 }
 
 int kingCheck(int x1, int y1, int x2, int y2)
 {
-    return 1;
+    int xDiff = x1 - x2;
+    int yDiff = y1 - y2;
+
+    if (abs(xDiff) > 1 || abs(yDiff) > 1)
+        return 0;
+    else
+        return queenCheck(x1, y1, x2, y2);
 }

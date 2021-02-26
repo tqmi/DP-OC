@@ -36,6 +36,8 @@ int kingCheck(int x1, int y1, int x2, int y2);
 int isBlackKingChecked();
 int isWhiteKingChecked();
 int isKingChecked();
+int canPieceStopCheck(int x1, int y1);
+int isMate();
 
 int board[8][8];
 int playerTurn;
@@ -102,7 +104,9 @@ void printBoard(int board[8][8])
     printf("\n");
 }
 
-//returns 0 on invalid move, otherwise returns 1
+//returns 0 on invalid move
+//returns 1 for valid move
+//returns 2 for valid move with check
 // x1,y1 - initial position, can have values between [1,8]
 // x2,y2 - new position
 int movePiece(int x1, int y1, int x2, int y2)
@@ -112,19 +116,26 @@ int movePiece(int x1, int y1, int x2, int y2)
     if (!fullCheck(x1, y1, x2, y2))
         return 0;
 
-    //in case a player tries to move the enemies pieces
+    //in case a player tries to move the enemy pieces
     if (board[x1][y1] * playerTurn < 0)
         return 0;
 
+    //moving piece
     int pieceType = board[x1][y1];
     board[x2][y2] = pieceType;
     board[x1][y1] = 0;
 
-    playerTurn *= -1;
+    playerTurn *= -1; //next player
 
-    if(isKingChecked()) return 2;
-
-    return 1;
+    if (isKingChecked())
+    {
+        if (isMate())
+            return 3;
+        else
+            return 2;
+    }
+    else
+        return 1;
 }
 
 //return 1 if its white's turn and -1 for black
@@ -148,19 +159,19 @@ int fullCheck(int x1, int y1, int x2, int y2)
     if (!basicCheck(x1, y1, x2, y2))
         return 0;
 
-
     //checks if the king will still be checked after making the move
-    int pieceType = board[x1][y1];
-    board[x2][y2] = pieceType;
+    int pieceStart = board[x1][y1];
+    int pieceEnd = board[x2][y2];
+    board[x2][y2] = pieceStart;
     board[x1][y1] = 0;
-    if(isKingChecked())
+    if (isKingChecked())
     {
-        board[x2][y2] = 0;
-        board[x1][y1] = pieceType;
+        board[x2][y2] = pieceEnd;
+        board[x1][y1] = pieceStart;
         return 0;
     }
-    board[x2][y2] = 0;
-    board[x1][y1] = pieceType;
+    board[x2][y2] = pieceEnd;
+    board[x1][y1] = pieceStart;
 
     return 1;
 }
@@ -417,7 +428,6 @@ void findKing(int color, int *kX, int *kY)
             }
 }
 
-//returns 1 if king is checked, 0 otherwise
 int isWhiteKingChecked()
 {
     int kX, kY; //king location
@@ -431,7 +441,6 @@ int isWhiteKingChecked()
     return 0;
 }
 
-//returns 1 if king is checked, 0 otherwise
 int isBlackKingChecked()
 {
     int kX, kY; //king location
@@ -445,12 +454,44 @@ int isBlackKingChecked()
     return 0;
 }
 
+//returns 1 if king is checked, 0 otherwise
 int isKingChecked()
 {
     if (getPlayerTurn() > 0)
         return isWhiteKingChecked();
     else
         return isBlackKingChecked();
+}
+
+int canPieceStopCheck(int x1, int y1)
+{
+
+    for (int i = 0; i < 8; i++)
+        for (int j = 0; j < 8; j++)
+        {
+            if (fullCheck(x1, y1, i, j))
+                return 1;
+        }
+
+    return 0;
+}
+
+int isMate()
+{
+    int color = playerTurn;
+
+    for (int i = 0; i < 8; i++)
+        for (int j = 0; j < 8; j++)
+        {
+
+            if (board[i][j] * color > 0)
+            {
+                if (canPieceStopCheck(i, j))
+                    return 0;
+            }
+        }
+
+    return 1;
 }
 
 int testMove(int x1, int y1, int x2, int y2)
@@ -462,7 +503,6 @@ int testMove(int x1, int y1, int x2, int y2)
     board[x1][y1] = 0;
     return 1;
 }
-
 
 //for testing
 int main()
@@ -497,10 +537,12 @@ int main()
 
         if (x == 0)
             printf("BAD MOVE\n");
-        else if (x==2)
+        else if (x == 2)
             printf("CHEKED\n");
+        else if (x == 3)
+            printf("MATE\n");
 
-    } while (1);
+    } while (x!=3);
 
     return 0;
 }

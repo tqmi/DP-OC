@@ -1,0 +1,16 @@
+client -> server :
+	username -> connection init
+	ask for eligible users to play with
+	which player you wanna play with
+	game request confirmation/decline
+	game info (move to be made) : A 1 A 4
+	end connection request
+
+	
+server -> client : 
+	list with other users
+	send color info
+	game info (move to be made) : A 1 A 4
+	game request/confirmation/decline
+	disconcetion error (from oponent)
+	illegal move

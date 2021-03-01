@@ -1,18 +1,22 @@
 #include "../libs/network.h"
 #include <stdio.h>
 #include <unistd.h>
-#define PORT 8080
-#define ADDR "127.0.0.1"
+#include <string.h>
 int main(int argc, char const *argv[])
 {
-	int sock;
+
 	char msg[100] = {0};
-	printf("%d",connect_to_server(PORT,ADDR,&sock));
-	for(int i = 1 ; i <= 10 ; i ++){
-		sprintf(msg,"Hello %d\n",i);
-		write_data(sock,msg);
-		sleep(1);
+	int connfd;
+	initialize_network(CLIENT,PORT,ADDR);
+	while (1){
+		memset(msg,0,100);
+		if(read_data(msg,100,&connfd) > 0)
+			if(connfd == stdin->_fileno)
+				write_data(0,msg);
+			else
+				printf("%s",msg);
+		// sleep(1);
 	}
-	close(sock);
+	closeConnections();
 	return 0;
 }

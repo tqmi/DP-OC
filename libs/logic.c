@@ -94,29 +94,6 @@ void getBoard(int auxBoard[8][8])
     memcpy(auxBoard, board, 8 * 8 * sizeof(int));
 }
 
-//for testing
-void printBoard(int board[8][8])
-{
-    for (int i = 7; i >= 0; i--)
-    {
-        for (int j = 0; j < 8; j++)
-        {
-
-            if (board[j][i] < 0)
-                printf(" %d", board[j][i]);
-            else
-                printf("  %d", board[j][i]);
-        }
-
-        printf(" |%d\n", i + 1);
-    }
-    for (int j = 0; j < 8; j++)
-        printf("  _");
-    printf("\n");
-    for (int j = 0; j < 8; j++)
-        printf("  %d", j + 1);
-    printf("\n");
-}
 
 //returns 0 on invalid move
 //returns 1 for valid move
@@ -677,6 +654,29 @@ void setTestBoard()
     blackKingMoved = 0;
 }
 
+//for testing
+void printBoard(int board[8][8])
+{
+    for (int i = 7; i >= 0; i--)
+    {
+        for (int j = 0; j < 8; j++)
+        {
+
+            if (board[j][i] < 0)
+                printf(" %d", board[j][i]);
+            else
+                printf("  %d", board[j][i]);
+        }
+
+        printf(" |%d\n", i + 1);
+    }
+    for (int j = 0; j < 8; j++)
+        printf("  _");
+    printf("\n");
+    for (int j = 0; j < 8; j++)
+        printf("  %d", j + 1);
+    printf("\n");
+}
 
 //for testing
 /*int main()

@@ -54,6 +54,11 @@ int playerTurn;
 int whiteKingMoved; //used for castling
 int blackKingMoved;
 
+void initLogic()
+{
+    setStartingBoard();
+}
+
 void setStartingBoard()
 {
     //Pawns
@@ -160,9 +165,9 @@ int getPlayerTurn()
 //makes the coord from user frendly to array frendly
 void resizeCoord(int* x1, int* y1, int* x2, int* y2)
 {
-    *x1 -= 1;
+    *x1 -= 'a';
     *y1 -= 1;
-    *x2 -= 1;
+    *x2 -= 'a';
     *y2 -= 1;
 }
 
@@ -687,7 +692,8 @@ void printBoard(int board[8][8])
     getBoard(auxBoard);
     printBoard(auxBoard);
 
-    int x1, x2, y1, y2;
+    int x1, x2;
+    int y1, y2;
 
     int x;
     do

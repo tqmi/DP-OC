@@ -23,8 +23,8 @@
 #define BLACK -1
 #define WHITE 1
 
-
-void setStartingBoard();
+//sets board
+void initLogic();
 
 //copies the board into the board given as a parameter
 void getBoard(int auxBoard[8][8]);

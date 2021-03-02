@@ -45,14 +45,12 @@ void run_cyclic(){
 		switch (get_state())
 		{
 		case S_INIT:
-			printMessage("Enter your username :");
 			set_state(S_AUTH);
 			break;
 		case S_AUTH:
 			if((rd = get_keyboard_input(buffer,1024)) > 0){
 				write_data(0,buffer);
 				set_state(S_MENU);
-				printMessage("You are in the menu!\nType exit to exit!");
 			}
 			break;
 		case S_MENU:
@@ -62,11 +60,9 @@ void run_cyclic(){
 				}
 				if(strcmp(buffer,"wait\n") == 0){
 					set_state(S_WAIT);
-					printMessage("Please wait for your opponent to accept invitation!");
 				}
 				if(strcmp(buffer,"conf\n") == 0){
 					set_state(S_CONF);
-					printMessage("Do you want to play with ... ? (yes/no)");
 				}
 			}
 			break;
@@ -84,10 +80,8 @@ void run_cyclic(){
 				}
 				if(strcmp(buffer,"yes\n") == 0){
 					set_state(S_PLAY);
-					printMessage("You are now playing!");
 				}if(strcmp(buffer,"no\n") == 0){
 					set_state(S_MENU);
-					printMessage("You are in the menu!\nType exit to exit!");
 				}
 			}
 			break;
@@ -95,7 +89,6 @@ void run_cyclic(){
 			if((rd = get_keyboard_input(buffer,1024)) > 0){
 				if(strcmp(buffer,"exit\n") == 0){
 					set_state(S_MENU);
-					printMessage("You are in the menu!\nType exit to exit!");
 				}
 			}
 			break;

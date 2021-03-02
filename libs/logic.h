@@ -29,10 +29,11 @@ void init_logic();
 //copies the board into the board given as a parameter
 void getBoard(int auxBoard[8][8]);
 
-//returns 0 on invalid move 
+//returns 0 on invalid move
 //returns 1 for valid move
 //returns 2 for valid move with check
 //returns 3 for valid move with mate
+//returns 4 for valid move with pawn promotions
 // x1,y1 - initial position, can have values between [1,8]
 // x2,y2 - new position
 int movePiece(int x1, int y1, int x2, int y2);

@@ -208,7 +208,25 @@ int get_keyboard_input(char * buffer, int bufflen){
     return 0;
 }
 
+int validate_move(char * buffer){
 
+	int x1,x2,x3,x4;
+	sscanf(buffer,"%c %d %c %d",&x1,&x2,&x3,&x4);
+	if(x1 >= 'A' && x1 <= 'Z'){
+		x1 = x1 - 'A' + 'a';
+	}
+
+	if(x3 >= 'A' && x3 <= 'Z'){
+		x3 = x3 - 'A' + 'a';
+	}
+
+	if(x1 < 'a' || x1 > 'h' || x3 < 'a' || x3 > 'h' || x2 < 1 || x2 > 8 || x4 < 1 || x4 > 8)
+		return -1;
+
+	if(movePiece(x1,x2,x3,x4))
+	    return 1;
+    return 0;
+}
 // int main()
 // {
 

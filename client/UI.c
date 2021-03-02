@@ -112,8 +112,8 @@ void printBoard(int board[8][8])
 {
     systemClear();
     int size = 8;
-    int row = 8;
-    char column = 'A';
+    int row = 'A';
+    char column = 1;
     int row_board = 0;
     int column_board = 0;
 
@@ -123,7 +123,7 @@ void printBoard(int board[8][8])
     for (int i = 0; i < 8; i++)
     {
         red();
-        wprintf(L"  %lc ", column);
+        wprintf(L"  %ld ", column);
         column += 1;
     }
     wprintf(L"\n");
@@ -143,7 +143,7 @@ void printBoard(int board[8][8])
 
         //Draw the squares
         red();
-        wprintf(L"       %ld  ", row);
+        wprintf(L"       %lc  ", row);
         reset();
         for (int j = 0; j < size; j++)
         {
@@ -163,9 +163,9 @@ void printBoard(int board[8][8])
 
         wprintf(L"|  ");
         red();
-        wprintf(L"%ld\n", row);
+        wprintf(L"%lc\n", row);
         reset();
-        row -= 1;
+        row += 1;
         row_board += 1;
         column_board = 0;
 
@@ -182,12 +182,12 @@ void printBoard(int board[8][8])
     //Bottom line end
 
     //Write the A B C.. series
-    column = 'A';
+    column = 1;
     wprintf(L"          ");
     for (int i = 0; i < 8; i++)
     {
         red();
-        wprintf(L"  %lc ", column);
+        wprintf(L"  %ld ", column);
         column += 1;
     }
     wprintf(L"\n");

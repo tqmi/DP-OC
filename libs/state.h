@@ -9,6 +9,8 @@
 #define S_PLAY 5
 #define S_END 6
 
+int get_player_color();
+void set_player_color(int c);
 
 void init_state();
 int get_state();

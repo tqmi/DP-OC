@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <wchar.h>
+#include <stdlib.h>
 
 void initialize_modules();
 void deinitialize_modules();
@@ -32,6 +33,25 @@ void initialize_modules(){
 
 void deinitialize_modules(){
 	closeConnections();
+}
+
+int validate_move(char * buffer){
+
+	int x1,x2,x3,x4;
+	sscanf(buffer,"%c %d %c %d",&x1,&x2,&x3,&x4);
+	if(x1 >= 'A' && x1 <= 'Z'){
+		x1 = x1 - 'A' + 'a';
+	}
+
+	if(x3 >= 'A' && x3 <= 'Z'){
+		x3 = x3 - 'A' + 'a';
+	}
+
+	if(x1 < 'a' || x1 > 'h' || x3 < 'a' || x3 > 'h' || x2 < 1 || x2 > 8 || x4 < 1 || x4 > 8)
+		return -1;
+
+	movePiece(x1,x2,x3,x4);
+	return 1;
 }
 
 void run_cyclic(){
@@ -89,6 +109,14 @@ void run_cyclic(){
 			if((rd = get_keyboard_input(buffer,1024)) > 0){
 				if(strcmp(buffer,"exit\n") == 0){
 					set_state(S_MENU);
+				}
+				else{
+					if(getPlayerTurn() == get_player_color()){
+						if(validate_move(buffer)){
+							getBoard(board);
+							printBoard(board);
+						}
+					}
 				}
 			}
 			break;

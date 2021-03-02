@@ -1,6 +1,20 @@
 #include "state.h"
 #include "../client/UI.h"
+#include "logic.h"
+
 int c_state;
+int player_color;
+int board[8][8];
+
+int get_player_color(){
+	return player_color;
+}
+
+
+void set_player_color(int c){
+	player_color = c;
+}
+
 
 void init_state(){
 	c_state = S_INIT;
@@ -11,7 +25,6 @@ int get_state(){
 }
 
 void set_state(int s){
-
 	switch (s)
 	{
 	case S_INIT:
@@ -29,7 +42,10 @@ void set_state(int s){
 		printMessage("Do you want to play with ... ? (yes/no)");
 		break;
 	case S_PLAY:
-		printMessage("You are now playing!");
+		// printMessage("You are now playing! You are white!");
+		getBoard(board);
+		printBoard(board);
+		player_color = 1;
 		break;
 	case S_END:
 		printMessage("Goodbye!");

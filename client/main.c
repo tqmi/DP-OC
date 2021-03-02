@@ -1,4 +1,6 @@
 #include "../libs/network.h"
+#include "../libs/logic.h"
+#include "UI.h"
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
@@ -21,6 +23,7 @@ int main(int argc, char const *argv[])
 
 void initialize_modules(){
 	initialize_network(CLIENT,PORT,ADDR);
+	
 }
 
 void deinitialize_modules(){

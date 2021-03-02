@@ -38,7 +38,10 @@ void run_cyclic(){
 	int running = 1;
 	int rd = 0;
 	char buffer[1024];
+	int board[8][8];
 	while(running){
+
+		memset(buffer,0,1024);
 		switch (get_state())
 		{
 		case S_INIT:
@@ -48,7 +51,6 @@ void run_cyclic(){
 		case S_AUTH:
 			if((rd = get_keyboard_input(buffer,1024)) > 0){
 				write_data(0,buffer);
-				memset(buffer,0,1024);
 				set_state(S_MENU);
 				printMessage("You are in the menu!\nType exit to exit!");
 			}
@@ -58,14 +60,44 @@ void run_cyclic(){
 				if(strcmp(buffer,"exit\n") == 0){
 					set_state(S_END);
 				}
-				memset(buffer,0,1024);
+				if(strcmp(buffer,"wait\n") == 0){
+					set_state(S_WAIT);
+					printMessage("Please wait for your opponent to accept invitation!");
+				}
+				if(strcmp(buffer,"conf\n") == 0){
+					set_state(S_CONF);
+					printMessage("Do you want to play with ... ? (yes/no)");
+				}
 			}
 			break;
 		case S_WAIT:
+			if((rd = get_keyboard_input(buffer,1024)) > 0){
+				if(strcmp(buffer,"exit\n") == 0){
+					set_state(S_END);
+				}
+			}
 			break;
 		case S_CONF:
+			if((rd = get_keyboard_input(buffer,1024)) > 0){
+				if(strcmp(buffer,"exit\n") == 0){
+					set_state(S_END);
+				}
+				if(strcmp(buffer,"yes\n") == 0){
+					set_state(S_PLAY);
+					printMessage("You are now playing!");
+				}if(strcmp(buffer,"no\n") == 0){
+					set_state(S_MENU);
+					printMessage("You are in the menu!\nType exit to exit!");
+				}
+			}
 			break;
 		case S_PLAY:
+			if((rd = get_keyboard_input(buffer,1024)) > 0){
+				if(strcmp(buffer,"exit\n") == 0){
+					set_state(S_MENU);
+					printMessage("You are in the menu!\nType exit to exit!");
+				}
+			}
 			break;
 		case S_END:
 			running = 0;

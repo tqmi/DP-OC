@@ -4,7 +4,7 @@
 #include <wchar.h>
 #include <locale.h>
 #include <ctype.h>
-#include "../logic/logic.h"
+#include "../libs/logic.h"
 #include "UI.h"
 
 
@@ -52,51 +52,51 @@ wchar_t getPiecesSymbol(int piece)
 
     switch (piece)
     {
-    case wK:
+    case WKING:
         chess_piece = WHITE_KING;
         
         break;
-    case wQ:
+    case WQUEEN:
         chess_piece = WHITE_QUEEN;
         
         break;
-    case wR:
+    case WROOK:
         chess_piece = WHITE_ROOK;
        
         break;
-    case wB:
+    case WBISHOP:
         chess_piece = WHITE_BISHOP;
         
         break;
-    case wN:
+    case WKNIGHT:
         chess_piece = WHITE_KNITE;
         
         break;
-    case wP:
+    case WPAWN:
         chess_piece = WHITE_PAWN;
         
         break;
-    case bK:
+    case BKING:
         chess_piece = BLACK_KING;
         
         break;
-    case bQ:
+    case BQUEEN:
         chess_piece = BLACK_QUEEN;
         
         break;
-    case bR:
+    case BROOK:
         chess_piece = BLACK_ROOK;
         
         break;
-    case bB:
+    case BBISHOP:
         chess_piece = BLACK_BISHOP;
         
         break;
-    case bN:
+    case BKNIGHT:
         chess_piece = BLACK_KNITE;
        
         break;
-    case bP:
+    case BPAWN:
         chess_piece = BLACK_PAWN;
         
         break;
@@ -146,7 +146,7 @@ void printBoard(int board[8][8])
         reset();
         for (int j = 0; j < size; j++)
         {
-            if (board[row_board][column_board] == empty)
+            if (board[row_board][column_board] == EMPTY)
             {
                 wprintf(L"|   ");
             }

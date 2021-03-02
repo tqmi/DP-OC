@@ -4,25 +4,6 @@
 #include <stdlib.h>
 #include "logic.h"
 
-#define EMPTY 0
-
-#define BPAWN -1
-#define BKNIGHT -2 
-#define BBISHOP -3
-#define BROOK -4
-#define BQUEEN -5
-#define BKING -6
-
-#define WPAWN 1
-#define WKNIGHT 2
-#define WBISHOP 3
-#define WROOK 4
-#define WQUEEN 5
-#define WKING 6
-
-#define BLACK -1
-#define WHITE 1
-
 void resizeCoord(int* x1, int* y1, int* x2, int* y2);
 
 void movePieceDirectly(int x1, int y1, int x2, int y2);

@@ -1,3 +1,12 @@
 .vscode/settings.json
 client/client.x
 server/server.x
+*.out
+UI/p
+UI/n
+UI/CON
+UI/p
+*.out
+UI/n
+UI/p
+*.out

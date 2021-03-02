@@ -1,3 +1,5 @@
+#if !defined(UI_H_INCLUDED)
+#define UI_H_INCLUDED
 
 #define WHITE_KING 0x2654
 #define WHITE_QUEEN 0x2655
@@ -13,12 +15,18 @@
 #define BLACK_KNITE 0x265E
 #define BLACK_PAWN 0x265F
 
-void initUI(); //for character classification and conversion
+void init_UI(); //for character classification and conversion
 
 void printMessage(char* message);// prints a message given as parameter
 
 int giveAnswer(char answer); // return 0 or 1 depending on the giver parameter of type char ('n' or 'y')
 
 void printBoard(int board[8][8]);//prints the 8x8 board along with the chess symbols
+
+int get_keyboard_input(char * buffer, int bufflen);
+
+
+#endif // UI_H_INCLUDED
+
 
 

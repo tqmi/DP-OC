@@ -4,6 +4,7 @@
 #define CLIENT 1
 #define PORT 8080
 #define ADDR "127.0.0.1"
+#define KEYBOARDIN stdin->_fileno
 int initialize_network(int type,int port,char* addr);
 int read_data(char * buffer, int bufflen,int * fd);
 int write_data(int sockfd,const char const* data);

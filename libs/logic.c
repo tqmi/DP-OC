@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include "logic.h"
 
+void setStartingBoard();
+
 void resizeCoord(int* x1, int* y1, int* x2, int* y2);
 
 void movePieceDirectly(int x1, int y1, int x2, int y2);
@@ -35,7 +37,7 @@ int playerTurn;
 int whiteKingMoved; //used for castling
 int blackKingMoved;
 
-void initLogic()
+void init_logic()
 {
     setStartingBoard();
 }
@@ -641,28 +643,28 @@ void setTestBoard()
 }
 
 //for testing
-void printBoard(int board[8][8])
-{
-    for (int i = 7; i >= 0; i--)
-    {
-        for (int j = 0; j < 8; j++)
-        {
+// void printBoard(int board[8][8])
+// {
+//     for (int i = 7; i >= 0; i--)
+//     {
+//         for (int j = 0; j < 8; j++)
+//         {
 
-            if (board[j][i] < 0)
-                printf(" %d", board[j][i]);
-            else
-                printf("  %d", board[j][i]);
-        }
+//             if (board[j][i] < 0)
+//                 printf(" %d", board[j][i]);
+//             else
+//                 printf("  %d", board[j][i]);
+//         }
 
-        printf(" |%d\n", i + 1);
-    }
-    for (int j = 0; j < 8; j++)
-        printf("  _");
-    printf("\n");
-    for (int j = 0; j < 8; j++)
-        printf("  %d", j + 1);
-    printf("\n");
-}
+//         printf(" |%d\n", i + 1);
+//     }
+//     for (int j = 0; j < 8; j++)
+//         printf("  _");
+//     printf("\n");
+//     for (int j = 0; j < 8; j++)
+//         printf("  %d", j + 1);
+//     printf("\n");
+// }
 
 //for testing
 /*int main()

@@ -24,7 +24,7 @@
 #define WHITE 1
 
 //sets board
-void initLogic();
+void init_logic();
 
 //copies the board into the board given as a parameter
 void getBoard(int auxBoard[8][8]);
@@ -47,7 +47,7 @@ int promotePawn(int newPiece);
 
 //a basic print of the board
 //for testing, should be removed in the future
-void printBoard(int board[8][8]);
+// void printBoard(int board[8][8]);
 
 
 #endif // CHESS_LOGIC_H

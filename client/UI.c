@@ -6,6 +6,7 @@
 #include <ctype.h>
 #include "../libs/logic.h"
 #include "UI.h"
+#include "../libs/network.h"
 
 
 
@@ -19,7 +20,7 @@ void reset()
     wprintf(L"\033[0m");
 }
 
-void initUI()
+void init_UI()
 {
      setlocale(LC_CTYPE, "");
 }
@@ -33,7 +34,7 @@ void systemClear()
 void printMessage(char* message)
 {
     systemClear();
-    wprintf(L"%ls\n", message);
+    wprintf(L"%s\n", message);
 }
 
 int giveAnswer(char answer)
@@ -195,36 +196,48 @@ void printBoard(int board[8][8])
     
 }
 
+int get_keyboard_input(char * buffer, int bufflen){
+    int fd,rd;
+    if((rd = read_data(buffer,bufflen,&fd)) > 0){
+        if(fd == KEYBOARDIN){
+            return rd;
+        }else{
+            // TODO!!
+        }
+	}
+    return 0;
+}
 
-int main()
-{
+
+// int main()
+// {
 
    
     
-    initUI();
-    int board[8][8] =
-        {
+//     initUI();
+//     int board[8][8] =
+//         {
 
-            {-4, -2, -3, -5, -6, -3, -2, -4},
-            {-1, -1, -1, -1, -1, -1, -1, -1},
-            {0, 0, 0, 0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0, 0, 0, 0},
-            {1, 1, 1, 1, 1, 1, 1, 1},
-            {4, 2, 3, 5, 6, 3, 2, 4}};
+//             {-4, -2, -3, -5, -6, -3, -2, -4},
+//             {-1, -1, -1, -1, -1, -1, -1, -1},
+//             {0, 0, 0, 0, 0, 0, 0, 0},
+//             {0, 0, 0, 0, 0, 0, 0, 0},
+//             {0, 0, 0, 0, 0, 0, 0, 0},
+//             {0, 0, 0, 0, 0, 0, 0, 0},
+//             {1, 1, 1, 1, 1, 1, 1, 1},
+//             {4, 2, 3, 5, 6, 3, 2, 4}};
 
-    printBoard(board);
+//     printBoard(board);
 
-    int answer= giveAnswer('N');
+//     int answer= giveAnswer('N');
 
-    wprintf(L"%ld\n",answer);
+//     wprintf(L"%ld\n",answer);
 
 
-    return 0;
+//     return 0;
     
 
     
 
     
-}
+// }

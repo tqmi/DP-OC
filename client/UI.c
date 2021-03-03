@@ -195,36 +195,48 @@ void printBoard(int board[8][8])
     
 }
 
-
-int main()
+void printNameList(char **name_list, int length)
 {
+    systemClear();
+    
+    for (int i = 0; i < length; i++)
+        {
+            wprintf(L"%ld. %ls\n", i+1, name_list[i]);
+        }
+    wprintf(L"%ld. ", length+1);
+
+    red();
+    wprintf(L"EXIT\n");
+    reset();
+
+}
+
+// int main()
+// {
 
    
     
-    initUI();
-    int board[8][8] =
-        {
+//     initUI();
+//     int board[8][8] =
+//         {
 
-            {-4, -2, -3, -5, -6, -3, -2, -4},
-            {-1, -1, -1, -1, -1, -1, -1, -1},
-            {0, 0, 0, 0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0, 0, 0, 0},
-            {1, 1, 1, 1, 1, 1, 1, 1},
-            {4, 2, 3, 5, 6, 3, 2, 4}};
+//             {-4, -2, -3, -5, -6, -3, -2, -4},
+//             {-1, -1, -1, -1, -1, -1, -1, -1},
+//             {0, 0, 0, 0, 0, 0, 0, 0},
+//             {0, 0, 0, 0, 0, 0, 0, 0},
+//             {0, 0, 0, 0, 0, 0, 0, 0},
+//             {0, 0, 0, 0, 0, 0, 0, 0},
+//             {1, 1, 1, 1, 1, 1, 1, 1},
+//             {4, 2, 3, 5, 6, 3, 2, 4}};
 
-    printBoard(board);
-
-    int answer= giveAnswer('N');
-
-    wprintf(L"%ld\n",answer);
+//     char *name_list[4]={"Ana","Maria","Sorin", "Simona"};
+//     printNameList(name_list,4);
 
 
-    return 0;
+//     return 0;
     
 
     
 
     
-}
+// }

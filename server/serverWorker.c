@@ -1,28 +1,18 @@
+#include "../libs/messages.h"
 #include <stdio.h>
 #include <string.h>
 
 const char SEP[2] = " ";
 
-char * requestHandler(char request[])
+char * requestHandler(char request[], char *response)
 {
-    char *aux;  strcpy(aux, request);
-    char *tok;
-    char *action;
-    char *file_descriptor;
-    char params[128][30];
+    char *user = null;
+    char *payload = null;
 
-    tok = strtok(aux, SEP);
-
-    strcpy(action, tok);
-
-    tok = strtok(aux, SEP);
-
-    strcpy(file_descriptor, tok);
-
-    switch (actionHandler(action))
+    switch (decompose_message(request, user, payload))
     {
         case 0:
-            /* code */
+            printf("%s%s", user, payload);
             break;
         case 1:
             /* code */
@@ -51,21 +41,4 @@ char * requestHandler(char request[])
         default:
             break;
     }
-
-    return request;
-}
-
-int actionHandler(char action[])
-{
-    if(strcmp(action, 'conn_init') == 0)    return 0;
-    if(strcmp(action, 'av_users') == 0)     return 1;
-    if(strcmp(action, 'play_with') == 0)    return 2;
-    if(strcmp(action, 'game_request') == 0) return 3;
-    if(strcmp(action, 'make_move') == 0)    return 4;
-    if(strcmp(action, 'conn_end') == 0)     return 5;
-    if(strcmp(action, 'set_color') == 0)    return 6;
-    if(strcmp(action, 'player_left') == 0)  return 7;
-    if(strcmp(action, 'illegal_move') == 0) return 8;
-
-    return -1;
 }

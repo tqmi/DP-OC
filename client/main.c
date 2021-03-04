@@ -2,6 +2,7 @@
 #include "../libs/logic.h"
 #include "UI.h"
 #include "../libs/state.h"
+#include "../libs/messages.h"
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
@@ -42,6 +43,7 @@ void run_cyclic(){
 	int rd = 0;
 	char buffer[1024];
 	int board[8][8];
+	char msg[100];
 	while(running){
 
 		memset(buffer,0,1024);
@@ -52,7 +54,8 @@ void run_cyclic(){
 			break;
 		case S_AUTH:
 			if((rd = get_keyboard_input(buffer,1024)) > 0){
-				write_data(0,buffer);
+				compose_message(msg,MV_CONN_INIT,buffer,"");
+				write_data(0,msg);
 				set_state(S_MENU);
 			}
 			break;

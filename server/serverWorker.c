@@ -2,40 +2,38 @@
 #include <stdio.h>
 #include <string.h>
 
-const char SEP[2] = " ";
-
-char * requestHandler(char request[], char *response)
+void requestHandler(char request[], char *response)
 {
-    char *user = null;
-    char *payload = null;
+    char user[128] = {0};
+    char payload[1024] = {0};
 
     switch (decompose_message(request, user, payload))
     {
-        case 0:
+        case MV_CONN_INIT:
             printf("%s%s", user, payload);
             break;
-        case 1:
+        case MV_AV_USERS:
             /* code */
             break;
-        case 2:
+        case MV_PLAY_WITH:
             /* code */
             break;
-        case 3:
+        case MV_GAME_REQ:
             /* code */
             break;
-        case 4:
+        case MV_MAKE_MOVE:
             /* code */
             break;
-        case 5:
+        case MV_CONN_END:
             /* code */
             break;
-        case 6:
+        case MV_SET_COLOR:
             /* code */
             break;
-        case 7:
+        case MV_PLAYER_LEFT:
             /* code */
             break;
-        case 8:
+        case MV_ILLEGAL_MOVE:
             /* code */
             break;
         default:

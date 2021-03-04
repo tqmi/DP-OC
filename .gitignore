@@ -3,3 +3,12 @@ client/client.x
 server/server.x
 logic/o
 libs/o
+*.out
+UI/p
+UI/n
+UI/CON
+UI/p
+*.out
+UI/n
+UI/p
+*.out

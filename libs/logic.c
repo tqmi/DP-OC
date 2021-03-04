@@ -4,24 +4,7 @@
 #include <stdlib.h>
 #include "logic.h"
 
-#define EMPTY 0
-
-#define BPAWN -1
-#define BKNIGHT -2 
-#define BBISHOP -3
-#define BROOK -4
-#define BQUEEN -5
-#define BKING -6
-
-#define WPAWN 1
-#define WKNIGHT 2
-#define WBISHOP 3
-#define WROOK 4
-#define WQUEEN 5
-#define WKING 6
-
-#define BLACK -1
-#define WHITE 1
+void setStartingBoard();
 
 void resizeCoord(int* x1, int* y1, int* x2, int* y2);
 
@@ -53,6 +36,11 @@ int board[8][8];
 int playerTurn;
 int whiteKingMoved; //used for castling
 int blackKingMoved;
+
+void init_logic()
+{
+    setStartingBoard();
+}
 
 void setStartingBoard()
 {
@@ -160,9 +148,9 @@ int getPlayerTurn()
 //makes the coord from user frendly to array frendly
 void resizeCoord(int* x1, int* y1, int* x2, int* y2)
 {
-    *x1 -= 1;
+    *x1 -= 'a';
     *y1 -= 1;
-    *x2 -= 1;
+    *x2 -= 'a';
     *y2 -= 1;
 }
 
@@ -655,28 +643,28 @@ void setTestBoard()
 }
 
 //for testing
-void printBoard(int board[8][8])
-{
-    for (int i = 7; i >= 0; i--)
-    {
-        for (int j = 0; j < 8; j++)
-        {
+// void printBoard(int board[8][8])
+// {
+//     for (int i = 7; i >= 0; i--)
+//     {
+//         for (int j = 0; j < 8; j++)
+//         {
 
-            if (board[j][i] < 0)
-                printf(" %d", board[j][i]);
-            else
-                printf("  %d", board[j][i]);
-        }
+//             if (board[j][i] < 0)
+//                 printf(" %d", board[j][i]);
+//             else
+//                 printf("  %d", board[j][i]);
+//         }
 
-        printf(" |%d\n", i + 1);
-    }
-    for (int j = 0; j < 8; j++)
-        printf("  _");
-    printf("\n");
-    for (int j = 0; j < 8; j++)
-        printf("  %d", j + 1);
-    printf("\n");
-}
+//         printf(" |%d\n", i + 1);
+//     }
+//     for (int j = 0; j < 8; j++)
+//         printf("  _");
+//     printf("\n");
+//     for (int j = 0; j < 8; j++)
+//         printf("  %d", j + 1);
+//     printf("\n");
+// }
 
 //for testing
 /*int main()
@@ -687,7 +675,8 @@ void printBoard(int board[8][8])
     getBoard(auxBoard);
     printBoard(auxBoard);
 
-    int x1, x2, y1, y2;
+    int x1, x2;
+    int y1, y2;
 
     int x;
     do

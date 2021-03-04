@@ -1,4 +1,5 @@
 #include "../libs/network.h"
+#include "./serverWorker.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -18,6 +19,7 @@ int main(int argc, char const *argv[])
 			}
 			else{
 				printf("%d %s",connfd,buffer);
+				// strcpy(buffer, requestHandler(buffer));
 				write_data(connfd,buffer);
 			}
 		}

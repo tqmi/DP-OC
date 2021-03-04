@@ -14,3 +14,4 @@ server -> client :
 	game info (move to be made) : A 1 A 4	|	make_move <file_descriptor> <init_x> <init_y> <final_x> <final_y>
 	disconcetion error (from oponent)		|	player_left <file_descriptor> <usernameP2>
 	illegal move							|	illegal_move <file_descriptor>
+	username ok								|	conn_init <response> (0 for decline | 1 for accept)

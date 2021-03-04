@@ -1,0 +1,13 @@
+array -> useri (
+	username
+	file_descriptor
+	state
+	game (pointer)
+)
+
+array -> game (
+	palyer1 (pointer)
+	palyer2 (pointer)
+	turn (witch player turn)
+	board
+)

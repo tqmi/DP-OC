@@ -34,22 +34,28 @@ int get_msg_type_from_code(int code,char * type){
 
 //returns the originating user,payload and message type(numeric code) or -1 otherwise
 int decompose_message(const char* message,char* user, char* payload){
-	char aux[100];  strcpy(aux, message);
+    char aux[1024];  strcpy(aux, message);
     char *tok;
     char action[100];
     char params[128][30];
 
     tok = strtok(aux, SEP);
 
-    strcpy(action, tok);
+    if(tok != NULL) {
+	    strcpy(action, tok);
+    }
 
     tok = strtok(NULL, SEP);
 
-    strcpy(user, tok);
+    if(tok != NULL) {
+	    strcpy(user, tok);
+    }
 
-	tok = strtok(NULL, "");
+	tok = strtok(NULL, SEP);
 
-	strcpy(payload,tok);
+    if(tok != NULL) {
+	    strcpy(payload,tok);
+    }
 
 	return get_msg_type_from_name(action);
 }
@@ -62,7 +68,7 @@ int compose_message(char* msg, int msgType, const char* user,char* payload){
 		strcat(msg,user);
 		strcat(msg,SEP);
 		strcat(msg,payload);
-		
+		strcat(msg,"\0");
 	}
 	return -1;
 }

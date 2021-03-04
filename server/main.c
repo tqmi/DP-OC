@@ -20,7 +20,7 @@ int main(int argc, char const *argv[])
 				printf("%d disconnected\n",connfd);
 			}
 			else{
-				printf("%d %s",connfd,buffer);
+				// printf("%d %s",connfd,buffer);
 				requestHandler(buffer,buffer2);
 				write_data(connfd,buffer2);
 			}

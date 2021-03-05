@@ -1,16 +1,11 @@
 
 #include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
 #include "logic.h"
-
-void setStartingBoard();
+#include <wchar.h>
 
 void resizeCoord(int* x1, int* y1, int* x2, int* y2);
 
 void movePieceDirectly(int x1, int y1, int x2, int y2);
-
-int promotePawn(int newPiece);
 
 int fullCheck(int x1, int y1, int x2, int y2);
 int basicCheck(int x1, int y1, int x2, int y2);
@@ -32,17 +27,10 @@ int isKingChecked();
 int canPieceStopCheck(int x1, int y1);
 int isMate();
 
-int board[8][8];
-int playerTurn;
-int whiteKingMoved; //used for castling
-int blackKingMoved;
+int (* board)[8];
+t_game * game;
 
-void init_logic()
-{
-    setStartingBoard();
-}
-
-void setStartingBoard()
+void init_board(int board[8][8])
 {
     //Pawns
     for (int i = 0; i < 8; i++)
@@ -70,18 +58,7 @@ void setStartingBoard()
     //Kings
     board[4][0] = WKING;
     board[4][7] = BKING;
-
-    playerTurn = 1;
-    whiteKingMoved = 0;
-    blackKingMoved = 0;
 }
-
-//copies the board into the board given as a parameter
-void getBoard(int auxBoard[8][8])
-{
-    memcpy(auxBoard, board, 8 * 8 * sizeof(int));
-}
-
 
 //returns 0 on invalid move
 //returns 1 for valid move
@@ -90,10 +67,11 @@ void getBoard(int auxBoard[8][8])
 //returns 4 for valid move with pawn promotions
 // x1,y1 - initial position, can have values between [1,8]
 // x2,y2 - new position
-int movePiece(int x1, int y1, int x2, int y2)
+int movePiece(t_game * c_game,int x1, int y1, int x2, int y2)
 {
+    game = c_game;
+    board = c_game->board;
     resizeCoord(&x1, &y1, &x2, &y2);
-
     if (!fullCheck(x1, y1, x2, y2))
         return 0;
 
@@ -106,7 +84,7 @@ int movePiece(int x1, int y1, int x2, int y2)
     }
 
     movePieceDirectly(x1, y1, x2, y2);
-    playerTurn *= -1; //next player turn
+    alter_player_turn(c_game); //next player turn
 
     if (isKingChecked())
     {
@@ -122,6 +100,7 @@ int movePiece(int x1, int y1, int x2, int y2)
 //moves piece with no regards to rules
 void movePieceDirectly(int x1, int y1, int x2, int y2)
 {
+    wprintf(L"here\n");
     //moving piece
     int pieceType = board[x1][y1];
     board[x2][y2] = pieceType;
@@ -129,20 +108,14 @@ void movePieceDirectly(int x1, int y1, int x2, int y2)
 
     if (pieceType == 6)
     {
-        whiteKingMoved = WKING;
+        set_wkmoved(game,1);
     }
     else if (pieceType == BKING)
     {
-        blackKingMoved = 1;
+        set_bkmoved(game,1);
     }
 
    
-}
-
-//return 1 if its WHITE's turn and -1 for BLACK
-int getPlayerTurn()
-{
-    return playerTurn;
 }
 
 //makes the coord from user frendly to array frendly
@@ -205,7 +178,7 @@ int basicCheck(int x1, int y1, int x2, int y2)
     int pieceType = board[x1][y1];
 
     //in case a player tries to move the enemy pieces
-    if (pieceType * playerTurn < 0)
+    if (pieceType * get_turn(game) < 0)
         return 0;
 
     switch (pieceType)
@@ -261,9 +234,9 @@ int pawnPromotionCheck(int x1, int y1, int x2, int y2)
     if (abs(pieceType) == WPAWN) //BLACK or WHITE, dosent matter
     {
         //pawn promotion
-        if (playerTurn == WHITE && y2 == 7)
+        if (get_turn(game) == WHITE && y2 == 7)
             return 1;
-        else if (playerTurn == BLACK && y2 == 0)
+        else if (get_turn(game) == BLACK && y2 == 0)
             return 1;
         else
             return 0;
@@ -275,21 +248,22 @@ int pawnPromotionCheck(int x1, int y1, int x2, int y2)
 //promotes pawn to new piece
 //use values from [2,5], will be adjusted automaticaly depending on player turn
 //return 1 for valid piece value, 0 otherwise
-int promotePawn(int newPiece)
+int promotePawn(t_game * c_game ,int newPiece)
 {
+
     if (newPiece > 5 || newPiece < 2)
         return 0;
 
     // the player turn changes before promotion takes place
-    int playerTurnAux = playerTurn * (-1);
+    int playerTurnAux = get_turn(game) * (-1);
     if (playerTurnAux == WHITE)
     {
         for (int i = 0; i < 8; i++)
         {
             //find pawn on row
-            if (board[i][7] == WPAWN)
+            if (c_game->board[i][7] == WPAWN)
             {
-                board[i][7] = newPiece;
+                c_game->board[i][7] = newPiece;
                 return 1;
             }
         }
@@ -299,9 +273,9 @@ int promotePawn(int newPiece)
         for (int i = 0; i < 8; i++)
         {
             //find pawn on row
-            if (board[i][0] == BPAWN)
+            if (c_game->board[i][0] == BPAWN)
             {
-                board[i][0] = newPiece;
+                c_game->board[i][0] = newPiece;
                 return 1;
             }
         }
@@ -491,9 +465,9 @@ int kingCheck(int x1, int y1, int x2, int y2)
 //can king castle?
 int kingCastleCheck(int x1, int y1, int x2, int y2)
 {
-    if (playerTurn == WHITE && whiteKingMoved)
+    if (get_turn(game) == WHITE && get_wkmoved(game))
         return 0;
-    else if (playerTurn == BLACK && blackKingMoved)
+    else if (get_turn(game) == BLACK && get_bkmoved(game))
         return 0;
 
 
@@ -502,11 +476,11 @@ int kingCastleCheck(int x1, int y1, int x2, int y2)
     if (xDiff == -2) //king side castle
     {
         //WHITE
-        if (playerTurn == WHITE && board[5][0] == EMPTY && board[6][0] == EMPTY && board[7][0] == WROOK)
+        if (get_turn(game) == WHITE && board[5][0] == EMPTY && board[6][0] == EMPTY && board[7][0] == WROOK)
             return 1;
 
         //BLACK
-        else if (playerTurn == BLACK && board[5][7] == EMPTY && board[6][7] == EMPTY && board[7][7] == BROOK)
+        else if (get_turn(game) == BLACK && board[5][7] == EMPTY && board[6][7] == EMPTY && board[7][7] == BROOK)
             return 1;
 
         else
@@ -515,11 +489,11 @@ int kingCastleCheck(int x1, int y1, int x2, int y2)
     else if (xDiff == 2) //queen side castle
     {
         //WHITE
-        if (playerTurn == WHITE && board[0][0] == WROOK && board[1][0] == EMPTY && board[2][0] == EMPTY && board[3][0] == EMPTY)
+        if (get_turn(game) == WHITE && board[0][0] == WROOK && board[1][0] == EMPTY && board[2][0] == EMPTY && board[3][0] == EMPTY)
             return 1;
 
         //BLACK
-        else if (playerTurn == BLACK && board[0][7] == BROOK && board[1][7] == EMPTY && board[2][7] == EMPTY && board[3][7] == EMPTY)
+        else if (get_turn(game) == BLACK && board[0][7] == BROOK && board[1][7] == EMPTY && board[2][7] == EMPTY && board[3][7] == EMPTY)
             return 1;
 
         else
@@ -571,7 +545,7 @@ int isBlackKingChecked()
 //returns 1 if king is checked, 0 otherwise
 int isKingChecked()
 {
-    if (getPlayerTurn() > 0)
+    if (get_turn(game) > 0)
         return isWhiteKingChecked();
     else
         return isBlackKingChecked();
@@ -592,7 +566,7 @@ int canPieceStopCheck(int x1, int y1)
 
 int isMate()
 {
-    int color = playerTurn;
+    int color = get_turn(game);
 
     for (int i = 0; i < 8; i++)
         for (int j = 0; j < 8; j++)
@@ -608,112 +582,3 @@ int isMate()
     return 1;
 }
 
-void setTestBoard()
-{
-    //Pawns
-    for (int i = 0; i < 8; i++)
-    {
-        board[i][1] = WPAWN;
-        board[i][6] = BPAWN;
-    }
-
-    /*//Knights
-    board[1][0] = board[6][0] = WKNIGHT;
-    board[1][7] = board[6][7] = BKNIGHT;*/
-
-    /*//Bishops
-    board[2][0] = board[5][0] = WBISHOP;
-    board[2][7] = board[5][7] = BBISHOP;*/
-
-    //Rooks
-    board[0][0] = board[7][0] = WROOK;
-    board[0][7] = board[7][7] = BROOK;
-
-    /*//Queens
-    board[3][0] = WQUEEN;
-    board[3][7] = BQUEEN;*/
-
-    //Kings
-    board[4][0] = WKING;
-    board[4][7] = BKING;
-
-    playerTurn = 1;
-    whiteKingMoved = 0;
-    blackKingMoved = 0;
-}
-
-//for testing
-// void printBoard(int board[8][8])
-// {
-//     for (int i = 7; i >= 0; i--)
-//     {
-//         for (int j = 0; j < 8; j++)
-//         {
-
-//             if (board[j][i] < 0)
-//                 printf(" %d", board[j][i]);
-//             else
-//                 printf("  %d", board[j][i]);
-//         }
-
-//         printf(" |%d\n", i + 1);
-//     }
-//     for (int j = 0; j < 8; j++)
-//         printf("  _");
-//     printf("\n");
-//     for (int j = 0; j < 8; j++)
-//         printf("  %d", j + 1);
-//     printf("\n");
-// }
-
-//for testing
-/*int main()
-{
-    setTestBoard();
-
-    int auxBoard[8][8];
-    getBoard(auxBoard);
-    printBoard(auxBoard);
-
-    int x1, x2;
-    int y1, y2;
-
-    int x;
-    do
-    {
-        if (getPlayerTurn() > 0)
-            printf("WHITE TURN\n");
-        else
-            printf("BLACK TURN\n");
-        printf("Pick piece: ");
-        scanf("%d", &x1);
-        scanf("%d", &y1);
-        printf("Pick move: ");
-        scanf("%d", &x2);
-        scanf("%d", &y2);
-        printf("\n\n\n");
-
-        x = movePiece(x1, y1, x2, y2);
-
-        if (x == 4)
-        {
-            if (promotePawn(5))
-                printf("GOOD Promote\n");
-            else
-                printf("BAD Promote\n");
-        }
-
-        getBoard(auxBoard);
-        printBoard(auxBoard);
-
-        if (x == 0)
-            printf("BAD MOVE\n");
-        else if (x == 2)
-            printf("CHEKED\n");
-        else if (x == 3)
-            printf("MATE\n");
-
-    } while (x != 3);
-
-    return 0;
-}*/

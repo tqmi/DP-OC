@@ -23,9 +23,21 @@ typedef struct game{
 	struct user * black_player;
 	int turn;
 	int board[8][8];
+	
+	int whiteKingMoved; //used for castling
+	int blackKingMoved;
 }t_game;
 
 t_game * init_state_game(t_user * white, t_user * black);
+void get_board(t_game* c_game,int board[8][8]);
+void set_turn(t_game * c_game, int t);
+int get_turn(t_game* c_game);
+void alter_player_turn(t_game * c_game);
+void set_wkmoved(t_game * c_game, int v);
+int get_wkmoved(t_game * c_game);
+void set_bkmoved(t_game * c_game, int v);
+int get_bkmoved(t_game * c_game);
+int get_player_color(t_game * c_game,t_user * c_user);
 t_user * init_state_user();
 int get_state(t_user * c_user);
 void set_state(t_user * c_user,int s);

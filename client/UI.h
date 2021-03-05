@@ -21,7 +21,7 @@ void printMessage(char* message);// prints a message given as parameter
 
 int giveAnswer(char answer); // return 0 or 1 depending on the giver parameter of type char ('n' or 'y')
 
-void printBoard(int board[8][8]);//prints the 8x8 board along with the chess symbols
+void printBoard(int board[8][8],char *msg);//prints the 8x8 board along with the chess symbols
 
 int get_keyboard_input(char * buffer, int bufflen);
 

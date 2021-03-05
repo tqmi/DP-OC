@@ -39,8 +39,6 @@ int initialize_network(int type,int port,char* addr){
 		break;
 	}
 	return 0;
-	
-	
 }
 
 int initialize_socket(int port,int queue_len, int * sockfd){
@@ -123,7 +121,15 @@ int connect_to_server(int port, char* addr, int * sockfd){
 	return 0;
 }
 
-
+/* Reads data from clientsfd descriptor set
+ * returns number of bytes read
+ * reads bufflen bytes in buffer
+ * saves originating file descriptor in fd
+ * retval < 0 -> error
+ * retval == 0 and fd == -1 -> no data available
+ * retval == 0 and fd >= 0 -> connection described by fd no longer available
+ * retval > 0 -> bytes read
+ */
 int read_data(char * buffer, int bufflen,int * fd){
 
 	int conn_ready = 0;
@@ -140,12 +146,10 @@ int read_data(char * buffer, int bufflen,int * fd){
 				if((rd = read(clientsfd[i].fd,buffer,bufflen)) <= 0){
 					clientsfd[i].fd = -1;
 					clientsfd[i].revents = 0;
-					// printf("client disconnected\n");
+
 					return 0;
 				}
 				return rd;
-				// printf(buffer);
-				// fflush(stdout);
 			}
 			
 		}
@@ -155,7 +159,7 @@ int read_data(char * buffer, int bufflen,int * fd){
 	return 0;
 }
 
-int write_data(int sockfd,const char const* data){
+int write_data(int sockfd,const char * data){
 	// printf("writing data\n");
 	if(conn_type == CLIENT)
 		sockfd = clientsfd[1].fd;

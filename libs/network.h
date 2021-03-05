@@ -7,7 +7,7 @@
 #define KEYBOARDIN stdin->_fileno
 int initialize_network(int type,int port,char* addr);
 int read_data(char * buffer, int bufflen,int * fd);
-int write_data(int sockfd,const char const* data);
+int write_data(int sockfd,const char * data);
 int accept_connections();
 int initialize_socket(int port,int queue_len, int * sockfd);
 int connect_to_server(int port, char* addr, int * sockfd);

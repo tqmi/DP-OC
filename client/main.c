@@ -3,6 +3,7 @@
 #include "UI.h"
 #include "../libs/state.h"
 #include "../libs/messages.h"
+#include "inputHandler.h"
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
@@ -13,8 +14,18 @@ void initialize_modules();
 void deinitialize_modules();
 void run_cyclic();
 
+void send_list_req();
+void check_username();
+void ask_to_play();
+void check_confirm();
+void handle_move();
+void handle_server_data();
+
 int running = 0;
 t_user * user;
+int next_state = 0;
+char ** oplayers;
+int list_refresh_req = 0;
 
 int main(int argc, char const *argv[])
 {
@@ -28,39 +39,19 @@ int main(int argc, char const *argv[])
 }
 
 void initialize_modules(){
-	initialize_network(CLIENT,PORT,ADDR);
-	init_UI();
 	user = init_state_user();
+	if(initialize_network(CLIENT,PORT,ADDR) == 0){
+		next_state = S_AUTH;
+	}
+	init_UI();
+	
 }
 
 void deinitialize_modules(){
 	closeConnections();
+	free(user);
 }
 
-
-int validate_move(char * buffer){
-
-	int x1,x2,x3,x4;
-	sscanf(buffer,"%c%d%c%d",&x1,&x2,&x3,&x4);
-	x1 = 'a';
-	x2 = 2;
-	x3 = 'a';
-	x4 = 4;
-	if(x1 >= 'A' && x1 <= 'Z'){
-		x1 = x1 - 'A' + 'a';
-	}
-
-	if(x3 >= 'A' && x3 <= 'Z'){
-		x3 = x3 - 'A' + 'a';
-	}
-
-	if(x1 < 'a' || x1 > 'h' || x3 < 'a' || x3 > 'h' || x2 < 1 || x2 > 8 || x4 < 1 || x4 > 8)
-		return -1;
-
-	if(movePiece(get_user_game(user),x1,x2,x3,x4))
-	    return 1;
-    return 0;
-}
 
 void run_cyclic(){
 	int running = 1;
@@ -69,93 +60,105 @@ void run_cyclic(){
 	int board[8][8];
 	char msg[100];
 	while(running){
-
 		memset(buffer,0,1024);
-		switch (get_state(user))
+		int input_type = handle_inputs(user,buffer,1024);
+
+		switch (input_type){
+		case A_NO_ACTION:
+			break;	
+		case A_REFRESH  :
+			if(get_state(user) == S_INIT){
+				if(initialize_network(CLIENT,PORT,ADDR) == 0) 
+					next_state = S_AUTH;
+				else next_state = S_INIT;
+			}
+			else if(get_state(user) == S_MENU){
+				send_list_req();
+			}
+			break; 
+		case A_INCORRECT:
+			if(get_state(user) == S_AUTH){
+				next_state = S_AUTH;
+			}
+			else if(get_state(user) == S_PLAY){
+				get_board(get_user_game(user),board);
+				printBoard(board,"Invalid move!");
+			}
+			break;	
+		case A_USER_DATA:
+			if(get_state(user) == S_AUTH){
+				check_username();
+			}
+			else if(get_state(user) == S_MENU){
+				ask_to_play();
+			}
+			else if(get_state(user) == S_CONF){
+				check_confirm();	
+			}
+			else if(get_state(user) == S_PLAY){
+				handle_move();
+			}
+			break;	
+		case A_CONF_REQ :
+			next_state = S_CONF;
+			break; 
+		case A_QUIT     :
+			next_state = S_END;
+			break; 
+		case A_FORFEIT  :
+			next_state = S_MENU;
+			break; 
+		case A_SER_DATA :
+			handle_server_data();
+			break; 
+		case A_ERROR    :
+			next_state = S_INIT;
+			break; 
+		case A_SER_DISC :
+			next_state = S_INIT;
+			break; 
+		}
+
+		switch (next_state)
 		{
 		case S_INIT:
-			set_state(user,S_AUTH);
+			printMessage("Connectiong to the server failed or an error occured!\nType \"try again\" to retry connection or \"exit\" to exit!");
 			break;
 		case S_AUTH:
-			if((rd = get_keyboard_input(buffer,1024)) > 0){
-				compose_message(msg,MV_CONN_INIT,buffer,"");
-				write_data(0,msg);
-				set_state(user,S_MENU);
-			}
+			printMessage("Please enter a username:");
 			break;
 		case S_MENU:
-			if((rd = get_keyboard_input(buffer,1024)) > 0){
-				if(strcmp(buffer,"exit\n") == 0){
-					set_state(user,S_END);
-				}
-				if(strcmp(buffer,"wait\n") == 0){
-					set_state(user,S_WAIT);
-				}
-				if(strcmp(buffer,"conf\n") == 0){
-					set_state(user,S_CONF);
-				}
-			}
 			break;
 		case S_WAIT:
-			if((rd = get_keyboard_input(buffer,1024)) > 0){
-				if(strcmp(buffer,"exit\n") == 0){
-					set_state(user,S_END);
-				}
-			}
+			printMessage("Please wait for your opponent!");
 			break;
 		case S_CONF:
-			if((rd = get_keyboard_input(buffer,1024)) > 0){
-				if(strcmp(buffer,"exit\n") == 0){
-					set_state(user,S_END);
-				}
-				if(strcmp(buffer,"yes\n") == 0){
-					set_state(user,S_PLAY);
-				}if(strcmp(buffer,"no\n") == 0){
-					set_state(user,S_MENU);
-				}
-			}
+			printMessage("Do you want to play with ... ? (yes/no)");
 			break;
 		case S_PLAY:
-			if((rd = get_keyboard_input(buffer,1024)) > 0){
-				if(strcmp(buffer,"exit\n") == 0){
-					set_state(user,S_MENU);
-				}
-				else{
-					if(get_turn(get_user_game(user)) == get_player_color(get_user_game(user),user)){
-						wprintf(L"1\n");
-						if(validate_move(buffer) > 0){
-							wprintf(L"2\n");
-							get_board(get_user_game(user),board);
-							wprintf(L"3\n");
-							printBoard(board);
-						}
-					}
-				}
-			}
+			get_board(get_user_game(user),board);
+			printBoard(board,"You are ... ");
 			break;
 		case S_END:
+			printMessage("Goodbye!");
 			running = 0;
 			break;
 		
 		default:
 			break;
 		}
+		
+		if(next_state >= 0)
+			set_state(user,next_state);
+		next_state = -1;
+		
 	}
-
-
-	// running = 1;
-	// char msg[100];
-	// int connfd;
-	// while (running)
-	// {
-	// 	memset(msg,0,100);
-	// 	if(read_data(msg,100,&connfd) > 0)
-	// 		if(connfd == stdin->_fileno){
-	// 			if(strcmp("exit\n",msg) == 0)
-	// 				running = 0;
-	// 			write_data(0,msg);
-	// 		}
-	// 		else
-	// 			printf("%s",msg);
-	// }
 }
+
+
+void send_list_req(){}
+void check_username(){}
+void ask_to_play(){}
+void check_confirm(){}
+void handle_move(){}
+void handle_server_data(){}

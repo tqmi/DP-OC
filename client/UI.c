@@ -28,7 +28,7 @@ void init_UI()
 void systemClear()
 {
    
-    // system("clear");
+    system("clear");
 }
 
 void printMessage(char* message)
@@ -108,9 +108,10 @@ wchar_t getPiecesSymbol(int piece)
 
 }
 
-void printBoard(int board[8][8])
+void printBoard(int board[8][8],char *msg)
 {
     systemClear();
+    wprintf(L"%s\n", msg);
     int size = 8;
     int row = 'A';
     char column = 1;

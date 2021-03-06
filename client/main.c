@@ -15,11 +15,11 @@ void deinitialize_modules();
 void run_cyclic();
 
 void send_list_req();
-void check_username();
-void ask_to_play();
-void check_confirm();
-void handle_move();
-void handle_server_data();
+void check_username(char * buff);
+void ask_to_play(char * buff);
+void check_confirm(char * buff);
+void handle_move(char * buff);
+void handle_server_data(char * msg);
 
 int running = 0;
 t_user * user;
@@ -87,16 +87,16 @@ void run_cyclic(){
 			break;	
 		case A_USER_DATA:
 			if(get_state(user) == S_AUTH){
-				check_username();
+				check_username(buffer);
 			}
 			else if(get_state(user) == S_MENU){
-				ask_to_play();
+				ask_to_play(buffer);
 			}
 			else if(get_state(user) == S_CONF){
-				check_confirm();	
+				check_confirm(buffer);	
 			}
 			else if(get_state(user) == S_PLAY){
-				handle_move();
+				handle_move(buffer);
 			}
 			break;	
 		case A_CONF_REQ :
@@ -109,7 +109,7 @@ void run_cyclic(){
 			next_state = S_MENU;
 			break; 
 		case A_SER_DATA :
-			handle_server_data();
+			handle_server_data(buffer);
 			break; 
 		case A_ERROR    :
 			next_state = S_INIT;
@@ -156,9 +156,91 @@ void run_cyclic(){
 }
 
 
-void send_list_req(){}
-void check_username(){}
-void ask_to_play(){}
-void check_confirm(){}
-void handle_move(){}
-void handle_server_data(){}
+void send_list_req(){
+	char msg[1024];
+	compose_message(msg,MV_AV_USERS,get_username(user),"");
+	write_data(0,msg);
+}
+void check_username(char * buff){
+	char msg[1024];
+	compose_message(msg,MV_CONN_INIT,buff,"");
+	write_data(0,msg);
+}
+void ask_to_play(char * buff){
+	char msg[1024];
+	compose_message(msg,MV_PLAY_WITH,get_username(user),buff);
+	write_data(0,msg);
+	next_state = S_WAIT;
+}
+void check_confirm(char * buff){
+	char msg[1024];
+	char *ans;
+	if(strcmp(buff,"yes\n") == 0){
+		ans = "1";
+	}
+	else if(strcmp(buff,"no\n") == 0){
+		ans = "0";
+	}
+
+	compose_message(msg,MV_GAME_REQ,get_username(user),ans);
+	write_data(0,msg);
+}
+void handle_move(char * buff){
+	// TODO
+}
+void handle_server_data(char * msg){
+	int msg_type;
+	char server[100];memset(server,0,100);
+	char payload[1024];memset(payload,0,1024);
+	msg_type = decompose_message(msg,server,payload);
+	char users[100][100];
+	if(strcmp(server,"server")!=0)
+		return;
+	
+	switch(msg_type){
+	case MV_CONN_INIT   :
+		if(get_int(payload) && get_state(user) == S_AUTH) {
+			next_state = S_MENU;
+		}else{
+			next_state = S_AUTH;
+		}
+	break;
+	case MV_AV_USERS    : 
+		if(get_state(user) == S_MENU){
+			get_user_list(payload,users);
+			next_state = S_MENU;
+		}
+	break;
+	case MV_GAME_REQ    :
+		if(get_state(user) == S_MENU){
+			if(get_int(payload) == 2){
+				next_state = S_CONF;
+			}
+		} 
+	break;
+	case MV_MAKE_MOVE   : 
+		if(get_state(user) == S_PLAY){
+			// get_board(get_user_game(user),board);
+			// movePiece(board); TODO
+		}
+	break;
+	case MV_SET_COLOR   :
+		if(get_state(user) == S_MENU){
+			// TODO initialize game
+		} 
+	break;
+	case MV_PLAYER_LEFT : 
+		if(get_state(user) == S_PLAY){
+			// TODO player left
+			next_state = S_MENU;
+		}
+	break;
+	case MV_ILLEGAL_MOVE: 
+		if(get_state(user) == S_PLAY){
+			// TODO illegal move
+		}
+	break;
+	}
+
+
+}

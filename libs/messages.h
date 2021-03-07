@@ -2,8 +2,8 @@
 #define MESSAGES_H_INCLUDED
 
 #define MH_CONN_INIT 	"conn_init"
-#define MH_AV_USERS 	"conn_init"
-#define MH_PLAY_WITH 	"conn_init"
+#define MH_AV_USERS 	"av_users"
+#define MH_PLAY_WITH 	"play_with"
 #define MH_GAME_REQ 	"game_request"
 #define MH_MAKE_MOVE 	"make_move"
 #define MH_CONN_END 	"conn_end"

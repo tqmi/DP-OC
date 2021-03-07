@@ -9,6 +9,8 @@
 #include <string.h>
 #include <wchar.h>
 #include <stdlib.h>
+#include <errno.h>
+#include <limits.h>
 
 void initialize_modules();
 void deinitialize_modules();
@@ -26,12 +28,14 @@ t_user * user;
 int next_state = 0;
 char ** oplayers;
 int list_refresh_req = 0;
+int board[8][8];
 
 int main(int argc, char const *argv[])
 {
 
 	initialize_modules();
 
+	// handle_move("A 4 h 3");
 	run_cyclic();
 
 	deinitialize_modules();
@@ -55,17 +59,16 @@ void deinitialize_modules(){
 
 void run_cyclic(){
 	int running = 1;
-	int rd = 0;
 	char buffer[1024];
-	int board[8][8];
-	char msg[100];
 	while(running){
 		memset(buffer,0,1024);
 		int input_type = handle_inputs(user,buffer,1024);
 
 		switch (input_type){
+		
 		case A_NO_ACTION:
 			break;	
+		
 		case A_REFRESH  :
 			if(get_state(user) == S_INIT){
 				if(initialize_network(CLIENT,PORT,ADDR) == 0) 
@@ -76,6 +79,7 @@ void run_cyclic(){
 				send_list_req();
 			}
 			break; 
+		
 		case A_INCORRECT:
 			if(get_state(user) == S_AUTH){
 				next_state = S_AUTH;
@@ -85,6 +89,7 @@ void run_cyclic(){
 				printBoard(board,"Invalid move!");
 			}
 			break;	
+		
 		case A_USER_DATA:
 			if(get_state(user) == S_AUTH){
 				check_username(buffer);
@@ -99,6 +104,7 @@ void run_cyclic(){
 				handle_move(buffer);
 			}
 			break;	
+		
 		case A_CONF_REQ :
 			next_state = S_CONF;
 			break; 
@@ -128,6 +134,7 @@ void run_cyclic(){
 			printMessage("Please enter a username:");
 			break;
 		case S_MENU:
+			printMessage("MENU");
 			break;
 		case S_WAIT:
 			printMessage("Please wait for your opponent!");
@@ -155,23 +162,33 @@ void run_cyclic(){
 	}
 }
 
+int get_int(char * buff){
+	return strtol(buff,NULL,10);
+}
+
+void get_user_list(char * buff,char **list){
+
+}
 
 void send_list_req(){
 	char msg[1024];
 	compose_message(msg,MV_AV_USERS,get_username(user),"");
 	write_data(0,msg);
 }
+
 void check_username(char * buff){
 	char msg[1024];
 	compose_message(msg,MV_CONN_INIT,buff,"");
 	write_data(0,msg);
 }
+
 void ask_to_play(char * buff){
 	char msg[1024];
 	compose_message(msg,MV_PLAY_WITH,get_username(user),buff);
 	write_data(0,msg);
 	next_state = S_WAIT;
 }
+
 void check_confirm(char * buff){
 	char msg[1024];
 	char *ans;
@@ -185,8 +202,39 @@ void check_confirm(char * buff){
 	compose_message(msg,MV_GAME_REQ,get_username(user),ans);
 	write_data(0,msg);
 }
+
+int validate_move(int x1,int x2, int x3, int x4){
+
+	x1 = x1 - 10 + 'a';
+	x3 = x3 - 10 + 'a'; 
+
+	if(x1 < 'a' || x1 > 'h' || x3 < 'a' || x3 > 'h' || x2 < 1 || x2 > 8 || x4 < 1 || x4 > 8)
+		return -1;
+
+	if(movePiece(get_user_game(user),x1,x2,x3,x4))
+	    return 1;
+    return 0;
+}
+
 void handle_move(char * buff){
-	// TODO
+	if(get_turn(get_user_game(user)) == get_player_color(get_user_game(user),user)){
+		char * start = buff;
+		char * end;
+		int x1 = strtoll(start,&end,20);
+		start = end;
+		int x2 = strtoll(start,&end,20);
+		start = end;
+		int x3 = strtoll(start,&end,20);
+		start = end;
+		int x4 = strtoll(start,&end,20);
+		start = end;
+		// wprintf(L"%d %d %d %d\n",x1,x2,x3,x4);
+		if(validate_move(x1,x2,x3,x4)){
+			get_board(get_user_game(user),board);
+			printBoard(board,"Oponents turn");
+		}
+	}
+	else return;
 }
 void handle_server_data(char * msg){
 	int msg_type;
@@ -200,8 +248,9 @@ void handle_server_data(char * msg){
 	switch(msg_type){
 	case MV_CONN_INIT   :
 		if(get_int(payload) && get_state(user) == S_AUTH) {
+			send_list_req();
 			next_state = S_MENU;
-		}else{
+		}else if(get_state(user) == S_AUTH){
 			next_state = S_AUTH;
 		}
 	break;
@@ -217,15 +266,23 @@ void handle_server_data(char * msg){
 				next_state = S_CONF;
 			}
 		} 
+		else if(get_state(user) == S_WAIT){
+			if(get_int(payload) == 0){
+				next_state = S_MENU;
+			}
+			if(get_int(payload) == 1){
+				// wait for color
+			}
+		}
 	break;
 	case MV_MAKE_MOVE   : 
 		if(get_state(user) == S_PLAY){
 			// get_board(get_user_game(user),board);
-			// movePiece(board); TODO
+			// movePiece(board); 
 		}
 	break;
 	case MV_SET_COLOR   :
-		if(get_state(user) == S_MENU){
+		if(get_state(user) == S_WAIT || get_state(user) == S_CONF){
 			// TODO initialize game
 		} 
 	break;

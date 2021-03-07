@@ -25,7 +25,6 @@ void printBoard(int board[8][8],char *msg);//prints the 8x8 board along with the
 
 int get_keyboard_input(char * buffer, int bufflen);
 
-int validate_move(char * buffer);
 #endif // UI_H_INCLUDED
 
 

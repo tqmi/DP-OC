@@ -22,10 +22,10 @@ int main(int argc, char const *argv[])
 			}
 			else{
 				printf("%d %s\n",connfd,buffer);
-				requestHandler(buffer,buffer2);
-				memset(buffer,0,1024);
-				compose_message(buffer,MV_CONN_INIT,"server","1");
-				write_data(connfd,buffer);
+				requestHandler(buffer, buffer2, connfd);
+				// memset(buffer,0,1024);
+				// compose_message(buffer,MV_CONN_INIT,"server","1");
+				// write_data(connfd,buffer);
 			}
 		}
 	}

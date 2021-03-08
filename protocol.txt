@@ -10,7 +10,7 @@ client -> server :
 server -> client : 
 	list with other users					|	av_users <file_descriptor> [<username>,<username>,<username>]
 	send color info							|	set_color <file_descriptor> <color> (1 for black / 0 for white)
-	game request/confirmation/decline		|	game_request <file_descriptor> <response> (0 for decline | 1 for accept | 2 for request)
+	game request/confirmation/decline		|	game_request <file_descriptor> <response> (0 for decline | 1 for accept | 2 for request) <user> (for request)
 	game info (move to be made) : A 1 A 4	|	make_move <file_descriptor> <init_x> <init_y> <final_x> <final_y>
 	disconcetion error (from oponent)		|	player_left <file_descriptor> <usernameP2>
 	illegal move							|	illegal_move <file_descriptor>

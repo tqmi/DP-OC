@@ -9,6 +9,7 @@
 #define SERVER_ID "server"
 
 t_user **USERS;
+t_game **GAMES;
 int N_USERS;
 
 void requestHandler(char request[], char *response, int fileDesc)
@@ -48,7 +49,6 @@ void requestHandler(char request[], char *response, int fileDesc)
             {
                 compose_message(msg,MV_GAME_REQ,SERVER_ID,"2");
                 write_data(get_user_fd(USERS[other_player]),msg);
-            
             }else{
                 compose_message(msg,MV_GAME_REQ,SERVER_ID,"0");
                 write_data(fileDesc,msg);
@@ -57,6 +57,7 @@ void requestHandler(char request[], char *response, int fileDesc)
             /* code */
             break;
         case MV_GAME_REQ:
+            
             /* code */
             break;
         case MV_MAKE_MOVE:

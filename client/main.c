@@ -20,6 +20,7 @@ void ask_to_play(char * buff);
 int check_confirm(char * buff);
 void handle_move(char * buff);
 void handle_server_data(char * msg);
+void handle_game_request(char * msg);
 
 int running = 0;
 t_user * user;
@@ -27,6 +28,8 @@ int next_state = 0;
 char ** oplayers;
 int list_refresh_req = 0;
 int board[8][8];
+char o_uname[100];
+char aux[1024] = {0};
 
 int main(int argc, char const *argv[])
 {
@@ -119,6 +122,7 @@ void run_cyclic(){
 		
 		case A_CONF_REQ :
 			if(get_state(user) == S_MENU){
+				handle_game_request(buffer);
 				next_state = S_CONF;
 			}
 			break; 
@@ -174,7 +178,11 @@ void run_cyclic(){
 			printMessage("Please wait for your opponent!");
 			break;
 		case S_CONF:
-			printMessage("Do you want to play with ... ? (yes/no)");
+			memset(aux,0,1024);
+			strcat(aux,"Do you want to play with ");
+			strcat(aux,o_uname);
+			strcat(aux,"? (yes/no)");
+			printMessage(aux);
 			break;
 		case S_PLAY:
 			get_board(get_user_game(user),board);
@@ -202,7 +210,15 @@ void run_cyclic(){
 	}
 }
 
-void get_user_list(char * buff,char **list){
+void handle_game_request(char * msg){
+	char server[100] = {0};
+	char payload[1024] = {0};
+
+	decompose_message(msg,server,payload);
+	char * tok = strtok(payload,",");
+	tok = strtok(NULL,",");
+	if(tok != NULL)
+		strcpy(o_uname,tok);
 
 }
 

@@ -75,10 +75,10 @@ int processConnInit(char * user, char * payload, int fileDesc)
         }
         else
         {
-            printf("%s %s", get_username(USERS[i]), user);
+            // printf("%s %s", get_username(USERS[i]), user);
             if(strcmp(get_username(USERS[i]), user) == 0)
             {
-                printf("in if\n");
+                // printf("in if\n");
                 return 0;
             }
         }
@@ -94,6 +94,6 @@ int processConnInit(char * user, char * payload, int fileDesc)
     set_username(USERS[indexFree], user);
     set_user_fd(USERS[indexFree], fileDesc);
     set_state(USERS[indexFree], ACTIVE);
-
+    printf("%d %s connected\n",fileDesc,user);
     return 1;
 }

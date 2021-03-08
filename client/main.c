@@ -81,7 +81,8 @@ void run_cyclic(){
 		
 		case A_INCORRECT: 
 			if(get_state(user) == S_AUTH){ // server resonse for invalid username
-				next_state = S_AUTH;
+				// next_state = S_AUTH;
+				printMessage("Username already taken! please choose anothe one:");
 			}
 			else if(get_state(user) == S_PLAY){ //idk yet
 				get_board(get_user_game(user),board);
@@ -205,7 +206,9 @@ void send_list_req(){
 
 void check_username(char * buff){
 	char msg[1024];
-	compose_message(msg,MV_CONN_INIT,buff,"");
+	char * uname = strtok(buff,"\n ");
+	set_username(user,uname);
+	compose_message(msg,MV_CONN_INIT,strtok(buff,"\n "),"");
 	write_data(0,msg);
 }
 

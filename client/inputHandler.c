@@ -68,9 +68,9 @@ int handle_server_input(t_user * c_user, char * msg){
 	switch(msg_type){
 	case MV_CONN_INIT   :
 		if(get_int(payload)) {
-			return A_CORRECT;
+			return A_CORRECT; // username accepted
 		}else {
-			return A_INCORRECT;
+			return A_INCORRECT; // username denied
 		}
 	break;
 	case MV_AV_USERS    : //TODO

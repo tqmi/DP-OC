@@ -37,7 +37,7 @@ int decompose_message(const char* message,char* user, char* payload){
     char aux[1024];  strcpy(aux, message);
     char *tok;
     char action[100];
-    char params[128][30];
+    // char params[128][30];
 
     tok = strtok(aux, SEP);
 

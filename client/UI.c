@@ -197,16 +197,20 @@ void printBoard(int board[8][8],char *msg)
     
 }
 
-int get_keyboard_input(char * buffer, int bufflen){
-    int fd,rd;
-    if((rd = read_data(buffer,bufflen,&fd)) > 0){
-        if(fd == KEYBOARDIN){
-            return rd;
-        }else{
-            // TODO!!
-        }
-	}
-    return 0;
+void printNameList(char *name_list)
+{
+    systemClear();
+    
+    wprintf(L"Please select a user to play with by typing his name or type \"exit\" for exiting or \"refresh\" for refreshing.\n");
+
+    char * token = strtok(name_list,",");
+
+    while(token != NULL){
+        wprintf(L"%s\n",token);
+        token = strtok(NULL,",");
+    }
+
+    reset();
 }
 
 // int main()
@@ -227,11 +231,8 @@ int get_keyboard_input(char * buffer, int bufflen){
 //             {1, 1, 1, 1, 1, 1, 1, 1},
 //             {4, 2, 3, 5, 6, 3, 2, 4}};
 
-//     printBoard(board);
-
-//     int answer= giveAnswer('N');
-
-//     wprintf(L"%ld\n",answer);
+//     char *name_list[4]={"Ana","Maria","Sorin", "Simona"};
+//     printNameList(name_list,4);
 
 
 //     return 0;

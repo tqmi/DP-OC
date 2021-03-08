@@ -21,6 +21,16 @@ t_game * init_state_game(t_user * white_p, t_user * black_p){
 	return c_game;
 }
 
+t_user * get_white_player(t_game* c_game)
+{
+	return c_game->white_player;
+}
+
+t_user * get_black_player(t_game* c_game)
+{
+	return c_game->black_player;
+}
+
 void get_board(t_game* c_game,int board[8][8]){
 	memcpy(board,c_game->board, 8 * 8 * sizeof(int));
 }

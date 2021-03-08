@@ -32,6 +32,8 @@ typedef struct game{
 }t_game;
 
 t_game * init_state_game(t_user * white, t_user * black);
+t_user * get_white_player(t_game* c_game);
+t_user * get_black_player(t_game* c_game)
 void get_board(t_game* c_game,int board[8][8]);
 void set_turn(t_game * c_game, int t);
 int get_turn(t_game* c_game);

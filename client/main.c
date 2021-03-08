@@ -20,6 +20,7 @@ void ask_to_play(char * buff);
 int check_confirm(char * buff);
 void handle_move(char * buff);
 void handle_server_data(char * msg);
+void handle_game_request(char * msg);
 
 int running = 0;
 t_user * user;
@@ -27,6 +28,8 @@ int next_state = 0;
 char ** oplayers;
 int list_refresh_req = 0;
 int board[8][8];
+char o_uname[100];
+char aux[1024] = {0};
 
 int main(int argc, char const *argv[])
 {
@@ -81,7 +84,8 @@ void run_cyclic(){
 		
 		case A_INCORRECT: 
 			if(get_state(user) == S_AUTH){ // server resonse for invalid username
-				next_state = S_AUTH;
+				// next_state = S_AUTH;
+				printMessage("Username already taken! please choose anothe one:");
 			}
 			else if(get_state(user) == S_PLAY){ //idk yet
 				get_board(get_user_game(user),board);
@@ -118,6 +122,7 @@ void run_cyclic(){
 		
 		case A_CONF_REQ :
 			if(get_state(user) == S_MENU){
+				handle_game_request(buffer);
 				next_state = S_CONF;
 			}
 			break; 
@@ -147,6 +152,14 @@ void run_cyclic(){
 		case A_OP_LEFT :
 			next_state = S_ENDG;
 			break;
+		case A_LIST_USERS :
+			if(get_state(user) == S_MENU){
+				char server[100] = {0};
+				char av_users[1024] = {0};
+				decompose_message(buffer,server,av_users);
+				printNameList(av_users);
+			}
+			break;
 		}
 
 		switch (next_state)
@@ -165,7 +178,11 @@ void run_cyclic(){
 			printMessage("Please wait for your opponent!");
 			break;
 		case S_CONF:
-			printMessage("Do you want to play with ... ? (yes/no)");
+			memset(aux,0,1024);
+			strcat(aux,"Do you want to play with ");
+			strcat(aux,o_uname);
+			strcat(aux,"? (yes/no)");
+			printMessage(aux);
 			break;
 		case S_PLAY:
 			get_board(get_user_game(user),board);
@@ -193,7 +210,15 @@ void run_cyclic(){
 	}
 }
 
-void get_user_list(char * buff,char **list){
+void handle_game_request(char * msg){
+	char server[100] = {0};
+	char payload[1024] = {0};
+
+	decompose_message(msg,server,payload);
+	char * tok = strtok(payload,",");
+	tok = strtok(NULL,",");
+	if(tok != NULL)
+		strcpy(o_uname,tok);
 
 }
 
@@ -205,13 +230,16 @@ void send_list_req(){
 
 void check_username(char * buff){
 	char msg[1024];
-	compose_message(msg,MV_CONN_INIT,buff,"");
+	char * uname = strtok(buff,"\n ");
+	set_username(user,uname);
+	compose_message(msg,MV_CONN_INIT,strtok(buff,"\n "),"");
 	write_data(0,msg);
 }
 
 void ask_to_play(char * buff){
 	char msg[1024];
-	compose_message(msg,MV_PLAY_WITH,get_username(user),buff);
+	char * uname = strtok(buff,"\n ");
+	compose_message(msg,MV_PLAY_WITH,get_username(user),uname);
 	write_data(0,msg);
 	next_state = S_WAIT;
 }

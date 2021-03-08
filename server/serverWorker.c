@@ -6,14 +6,44 @@
 #include <string.h>
 #include <stdlib.h>
 
-t_user **USERS;
-int N_USERS;
+#define SERVER_ID "server"
 
-void requestHandler(char request[], char *response, int fileDesc)
+t_user **USERS;
+t_game **GAMES;
+int N_USERS;
+int N_GAMES;
+
+void requestHandler(char request[], char *response, int fileDesc, int connection)
 {
     char user[128] = {0};
     char payload[1024] = {0};
     char msg[1024] = {0};
+    char ret_val[1024] = {0};
+    int other_player;
+
+    if(connection == 0)
+    {
+       for(int i = 0 ; i < N_USERS ; ++i)
+       {
+           if(get_user_fd(USERS[i]) == fileDesc)
+           {
+               set_state(USERS[i], DELETED);
+           }
+       }
+
+       for(int i = 0 ; i < N_GAMES ; ++i)
+       {
+           int black_player
+           if(get_user_fd(get_white_player(GAMES[i])) == fileDesc)
+           {
+               // smth for the white user
+           }
+           else if(get_user_fd(get_black_player(GAMES[i])) == fileDesc)
+           {
+               // smth for the black user
+           }
+       }
+    }
 
     switch (decompose_message(request, user, payload))
     {
@@ -23,24 +53,41 @@ void requestHandler(char request[], char *response, int fileDesc)
             if(processConnInit(user, payload, fileDesc))
             {
                 // username available, user initiated 
-                compose_message(msg, MV_CONN_INIT, "server", "1");
+                compose_message(msg, MV_CONN_INIT, SERVER_ID, "1");
             }
             else
             {
                 // username unavailable
-                compose_message(msg, MV_CONN_INIT, "server", "0");
+                compose_message(msg, MV_CONN_INIT, SERVER_ID, "0");
             }
 
             write_data(fileDesc, msg);
 
             break;
         case MV_AV_USERS:
-            /* code */
+            processAvUsers(user,payload,fileDesc,ret_val);
+            compose_message(msg,MV_AV_USERS,SERVER_ID,ret_val);
+            write_data(fileDesc,msg);
             break;
         case MV_PLAY_WITH:
+            
+            if((other_player = processPlayWith(user,payload,fileDesc)) >= 0) //returns -1 if not ok and >= 0 if ok
+            {
+                memset(payload,0,1024);
+                strcat(payload,"2,");
+                strcat(payload,user);
+                compose_message(msg,MV_GAME_REQ,SERVER_ID,payload);
+                printf("%s\n",msg);
+                write_data(get_user_fd(USERS[other_player]),msg);
+            }else{
+                compose_message(msg,MV_GAME_REQ,SERVER_ID,"0");
+                write_data(fileDesc,msg);
+            }
+
             /* code */
             break;
         case MV_GAME_REQ:
+            
             /* code */
             break;
         case MV_MAKE_MOVE:
@@ -75,10 +122,10 @@ int processConnInit(char * user, char * payload, int fileDesc)
         }
         else
         {
-            printf("%s %s", get_username(USERS[i]), user);
+            // printf("%s %s", get_username(USERS[i]), user);
             if(strcmp(get_username(USERS[i]), user) == 0)
             {
-                printf("in if\n");
+                // printf("in if\n");
                 return 0;
             }
         }
@@ -88,12 +135,42 @@ int processConnInit(char * user, char * payload, int fileDesc)
     {
         USERS = (t_user **) realloc(USERS, (++N_USERS) * sizeof(t_user *));
     }
+    else
+    {
+        free(USERS[indexFree]);
+    }
 
     USERS[indexFree] = init_state_user();
 
     set_username(USERS[indexFree], user);
     set_user_fd(USERS[indexFree], fileDesc);
     set_state(USERS[indexFree], ACTIVE);
-
+    printf("%d %s connected\n",fileDesc,user);
     return 1;
 }
+
+void processAvUsers(char * user, char * payload, int fileDesc, char * av_users)
+{
+
+    for(int i = 0 ; i < N_USERS ; ++i)
+    {
+        if(get_state(USERS[i]) != DELETED && get_user_fd(USERS[i]) != fileDesc)
+        {
+            strcat(av_users,get_username(USERS[i]));
+            strcat(av_users,",\0");
+        }
+    }
+
+}
+
+int processPlayWith(char * user, char * payload, int fileDesc) // returns the index of the opponent or -1 if not found
+{
+    for(int i = 0 ; i < N_USERS ; ++i)
+    {
+        if(get_state(USERS[i]) == ACTIVE && get_user_fd(USERS[i]) != fileDesc && strcmp(get_username(USERS[i]),payload) == 0)
+        {
+            return i;
+        }
+    }
+    return -1;
+}  

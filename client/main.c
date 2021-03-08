@@ -222,7 +222,8 @@ void check_username(char * buff){
 
 void ask_to_play(char * buff){
 	char msg[1024];
-	compose_message(msg,MV_PLAY_WITH,get_username(user),buff);
+	char * uname = strtok(buff,"\n ");
+	compose_message(msg,MV_PLAY_WITH,get_username(user),uname);
 	write_data(0,msg);
 	next_state = S_WAIT;
 }

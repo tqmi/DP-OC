@@ -10,6 +10,9 @@
 #define S_EXIT 6
 #define S_ENDG 7
 
+#define DELETED 0
+#define ACTIVE  1
+
 
 typedef struct user{
 	char username [100];

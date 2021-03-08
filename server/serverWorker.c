@@ -47,7 +47,10 @@ void requestHandler(char request[], char *response, int fileDesc)
             
             if((other_player = processPlayWith(user,payload,fileDesc)) >= 0) //returns -1 if not ok and >= 0 if ok
             {
-                compose_message(msg,MV_GAME_REQ,SERVER_ID,"2,ceva");
+                memset(payload,0,1024);
+                strcat(payload,"2,");
+                strcat(payload,user);
+                compose_message(msg,MV_GAME_REQ,SERVER_ID,payload);
                 printf("%s\n",msg);
                 write_data(get_user_fd(USERS[other_player]),msg);
             }else{

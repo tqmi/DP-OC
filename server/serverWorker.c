@@ -28,13 +28,38 @@ t_user * get_user_from_fd(int fd){
 }
 
 
-void requestHandler(char request[], char *response, int fileDesc)
+void requestHandler(char request[], char *response, int fileDesc, int connection)
 {
     char user[128] = {0};
     char payload[1024] = {0};
     char msg[1024] = {0};
     char ret_val[1024] = {0};
     int other_player;
+
+    if(connection == 0)
+    {
+       for(int i = 0 ; i < N_USERS ; ++i)
+       {
+           if(get_user_fd(USERS[i]) == fileDesc)
+           {
+               set_state(USERS[i], DELETED);
+           }
+       }
+
+       for(int i = 0 ; i < N_GAMES ; ++i)
+       {
+           int black_player;
+           if(get_user_fd(get_white_player(GAMES[i])) == fileDesc)
+           {
+               // smth for the white user
+           }
+           else if(get_user_fd(get_black_player(GAMES[i])) == fileDesc)
+           {
+               // smth for the black user
+           }
+       }
+    }
+
     switch (decompose_message(request, user, payload))
     {
         case MV_CONN_INIT:
@@ -159,6 +184,10 @@ int processConnInit(char * user, char * payload, int fileDesc)
     {
         USERS = (t_user **) realloc(USERS, (++N_USERS) * sizeof(t_user *));
     }
+    else
+    {
+        free(USERS[indexFree]);
+    }
 
     USERS[indexFree] = init_state_user();
 
@@ -187,7 +216,7 @@ int processPlayWith(char * user, char * payload, int fileDesc) // returns the in
 {
     for(int i = 0 ; i < N_USERS ; ++i)
     {
-        if(get_state(USERS[i]) != DELETED && get_user_fd(USERS[i]) != fileDesc && strcmp(get_username(USERS[i]),payload) == 0)
+        if(get_state(USERS[i]) == ACTIVE && get_user_fd(USERS[i]) != fileDesc && strcmp(get_username(USERS[i]),payload) == 0)
         {
             return i;
         }

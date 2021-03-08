@@ -149,6 +149,12 @@ void run_cyclic(){
 			next_state = S_ENDG;
 			break;
 		case A_LIST_USERS :
+			if(get_state(user) == S_MENU){
+				char server[100] = {0};
+				char av_users[1024] = {0};
+				decompose_message(buffer,server,av_users);
+				printNameList(av_users);
+			}
 			break;
 		}
 

@@ -197,20 +197,20 @@ void printBoard(int board[8][8],char *msg)
     
 }
 
-void printNameList(char **name_list, int length)
+void printNameList(char *name_list)
 {
     systemClear();
     
-    for (int i = 0; i < length; i++)
-        {
-            wprintf(L"%ld. %ls\n", i+1, name_list[i]);
-        }
-    wprintf(L"%ld. ", length+1);
+    wprintf(L"Please select a user to play with by typing his name or type \"exit\" for exiting or \"refresh\" for refreshing.\n");
 
-    red();
-    wprintf(L"EXIT\n");
+    char * token = strtok(name_list,",");
+
+    while(token != NULL){
+        wprintf(L"%s\n",token);
+        token = strtok(NULL,",");
+    }
+
     reset();
-
 }
 
 // int main()

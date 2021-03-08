@@ -73,11 +73,8 @@ int handle_server_input(t_user * c_user, char * msg){
 			return A_INCORRECT; // username denied
 		}
 	break;
-	case MV_AV_USERS    : //TODO
-		if(get_state(c_user) == S_MENU){
-			// get_user_list(payload,users);
-			// next_state = S_MENU;
-		}
+	case MV_AV_USERS    : 
+		return A_LIST_USERS;
 	break;
 	case MV_GAME_REQ    :
 		if(get_int(payload) == 2){

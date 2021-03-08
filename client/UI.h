@@ -23,7 +23,7 @@ int giveAnswer(char answer); // return 0 or 1 depending on the giver parameter o
 
 void printBoard(int board[8][8],char *msg);//prints the 8x8 board along with the chess symbols
 
-void printNameList(char **name_list, int length);
+void printNameList(char *name_list);
 #endif // UI_H_INCLUDED
 
 

@@ -17,6 +17,7 @@ void requestHandler(char request[], char *response, int fileDesc)
     char payload[1024] = {0};
     char msg[1024] = {0};
     char ret_val[1024] = {0};
+    int other_player;
     switch (decompose_message(request, user, payload))
     {
         case MV_CONN_INIT:
@@ -42,10 +43,12 @@ void requestHandler(char request[], char *response, int fileDesc)
             write_data(fileDesc,msg);
             break;
         case MV_PLAY_WITH:
-
-            if(processPlayWith(user,payload,fileDesc) >= 0) //returns -1 if not ok and >= 0 if ok
+            
+            if((other_player = processPlayWith(user,payload,fileDesc)) >= 0) //returns -1 if not ok and >= 0 if ok
             {
-                //TODO
+                compose_message(msg,MV_GAME_REQ,SERVER_ID,"2");
+                write_data(get_user_fd(USERS[other_player]),msg);
+            
             }else{
                 compose_message(msg,MV_GAME_REQ,SERVER_ID,"0");
                 write_data(fileDesc,msg);
@@ -125,7 +128,14 @@ void processAvUsers(char * user, char * payload, int fileDesc, char * av_users)
 
 }
 
-int processPlayWith(char * user, char * payload, int fileDesc)
+int processPlayWith(char * user, char * payload, int fileDesc) // returns the index of the opponent or -1 if not found
 {
+    for(int i = 0 ; i < N_USERS ; ++i)
+    {
+        if(get_state(USERS[i]) != DELETED && get_user_fd(USERS[i]) != fileDesc && strcmp(get_username(USERS[i]),payload) == 0)
+        {
+            return i;
+        }
+    }
     return -1;
 }  

@@ -105,7 +105,13 @@ void requestHandler(char request[], char *response, int fileDesc)
             break;
         case MV_MAKE_MOVE:
             if(processMakeMove(user, payload,fileDesc)){
-
+                compose_message(msg,MV_MAKE_MOVE,SERVER_ID,payload);
+                t_user * u = get_user_from_fd(fileDesc);
+                if(get_player_color(get_user_game(u),u) == WHITE)
+                    write_data(get_user_fd(get_black_payer(get_user_game(u))),msg);
+                else
+                    write_data(get_user_fd(get_white_payer(get_user_game(u))),msg);
+                printf("%s\n",msg);
             }
             else{
 
@@ -223,3 +229,8 @@ int processGameReq(char * user, char * payload, int fileDesc){
     }
     else return 0;
 } 
+
+int processMakeMove(char * user, char * payload, int fileDesc) //TODO : verify player moves
+{
+    return 1;
+}

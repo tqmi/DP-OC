@@ -21,6 +21,7 @@ int check_confirm(char * buff);
 void handle_move(char * buff);
 void handle_server_data(char * msg);
 void handle_game_request(char * msg);
+void handle_server_move(char *msg);
 
 int running = 0;
 t_user * user;
@@ -160,6 +161,9 @@ void run_cyclic(){
 				printNameList(av_users);
 			}
 			break;
+		case A_MAKE_MOVE :
+			handle_server_move(buffer);
+			break;
 		}
 
 		switch (next_state)
@@ -260,7 +264,7 @@ int validate_move(int x1,int x2, int x3, int x4){
 	x3 = x3 - 10 + 'a'; 
 
 	if(x1 < 'a' || x1 > 'h' || x3 < 'a' || x3 > 'h' || x2 < 1 || x2 > 8 || x4 < 1 || x4 > 8)
-		return -1;
+		return 0;
 
 	if(movePiece(get_user_game(user),x1,x2,x3,x4))
 	    return 1;
@@ -282,13 +286,37 @@ void handle_move(char * buff){
 		// wprintf(L"%d %d %d %d\n",x1,x2,x3,x4);
 		if(validate_move(x1,x2,x3,x4)){
 			char msg[1024] = {0};
-			compose_message(msg,MV_MAKE_MOVE,get_username(user),buff);
+			char aux[1024] = {0};
+			sprintf(aux,"%c,%d,%c,%d",x1-10+'A',x2,x3-10+'A',x4);
+			compose_message(msg,MV_MAKE_MOVE,get_username(user),aux);
 			write_data(0,msg);
 			get_board(get_user_game(user),board);
 			printBoard(board,"Oponents turn");
 		}
 	}
 	else return;
+}
+
+void handle_server_move(char *msg){
+	wprintf(L"here\n");
+	char server[100] = {0};
+	char buff[1024] = {0};
+	decompose_message(msg,server,buff);
+	char * start = buff;
+		char * end;
+		int x1 = strtoll(start,&end,20);
+		start = end+1;
+		int x2 = strtoll(start,&end,20);
+		start = end+1;
+		int x3 = strtoll(start,&end,20);
+		start = end+1;
+		int x4 = strtoll(start,&end,20);
+		start = end+1;
+		wprintf(L"%d %d %d %d\n",x1,x2,x3,x4);
+		if(validate_move(x1,x2,x3,x4)){
+			get_board(get_user_game(user),board);
+			printBoard(board,"Your turn!");
+		}
 }
 void handle_server_data(char * msg){
 	

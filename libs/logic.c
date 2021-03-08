@@ -106,7 +106,7 @@ void movePieceDirectly(int x1, int y1, int x2, int y2)
     board[x2][y2] = pieceType;
     board[x1][y1] = EMPTY;
 
-    if (pieceType == 6)
+    if (pieceType == WKING)
     {
         set_wkmoved(game,1);
     }

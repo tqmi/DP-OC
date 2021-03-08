@@ -42,6 +42,15 @@ void requestHandler(char request[], char *response, int fileDesc)
             write_data(fileDesc,msg);
             break;
         case MV_PLAY_WITH:
+
+            if(processPlayWith(user,payload,fileDesc) >= 0) //returns -1 if not ok and >= 0 if ok
+            {
+                //TODO
+            }else{
+                compose_message(msg,MV_GAME_REQ,SERVER_ID,"0");
+                write_data(fileDesc,msg);
+            }
+
             /* code */
             break;
         case MV_GAME_REQ:
@@ -115,3 +124,8 @@ void processAvUsers(char * user, char * payload, int fileDesc, char * av_users)
     }
 
 }
+
+int processPlayWith(char * user, char * payload, int fileDesc)
+{
+    return -1;
+}  

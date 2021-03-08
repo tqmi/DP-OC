@@ -106,10 +106,10 @@ void requestHandler(char request[], char *response, int fileDesc, int connection
             if(processGameReq(user, payload,fileDesc)){
                 set_turn(get_user_game(get_user_from_fd(fileDesc)),WHITE);
                 compose_message(msg,MV_SET_COLOR,SERVER_ID,"1");
-                write_data(get_user_fd(get_white_payer(get_user_game(get_user_from_fd(fileDesc)))),msg);
+                write_data(get_user_fd(get_white_player(get_user_game(get_user_from_fd(fileDesc)))),msg);
                 memset(msg,0,1024);
                 compose_message(msg,MV_SET_COLOR,SERVER_ID,"-1");
-                write_data(get_user_fd(get_black_payer(get_user_game(get_user_from_fd(fileDesc)))),msg);
+                write_data(get_user_fd(get_black_player(get_user_game(get_user_from_fd(fileDesc)))),msg);
             }
             else{
 
@@ -119,8 +119,8 @@ void requestHandler(char request[], char *response, int fileDesc, int connection
 
                 compose_message(msg,MV_GAME_REQ,SERVER_ID,"0");
                 
-                write_data(get_user_fd(get_black_payer(get_user_game(u))),msg);
-                write_data(get_user_fd(get_white_payer(get_user_game(u))),msg);
+                write_data(get_user_fd(get_black_player(get_user_game(u))),msg);
+                write_data(get_user_fd(get_white_player(get_user_game(u))),msg);
 
                 // free(get_user_game(u));
                 //TODO : free game space
@@ -133,9 +133,9 @@ void requestHandler(char request[], char *response, int fileDesc, int connection
                 compose_message(msg,MV_MAKE_MOVE,SERVER_ID,payload);
                 t_user * u = get_user_from_fd(fileDesc);
                 if(get_player_color(get_user_game(u),u) == WHITE)
-                    write_data(get_user_fd(get_black_payer(get_user_game(u))),msg);
+                    write_data(get_user_fd(get_black_player(get_user_game(u))),msg);
                 else
-                    write_data(get_user_fd(get_white_payer(get_user_game(u))),msg);
+                    write_data(get_user_fd(get_white_player(get_user_game(u))),msg);
                 printf("%s\n",msg);
             }
             else{

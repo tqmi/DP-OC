@@ -69,14 +69,6 @@ int get_player_color(t_game * c_game,t_user * c_user){
 	return 0;
 }
 
-t_user * get_white_payer(t_game * c_game){
-	return c_game ->white_player;
-}
-
-t_user * get_black_payer(t_game * c_game){
-	return c_game ->black_player;
-}
-
 t_user * init_state_user(){
 	t_user * c_user = (t_user *)malloc(sizeof(t_user));
 	c_user->state = S_INIT;

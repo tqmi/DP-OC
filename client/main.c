@@ -9,8 +9,6 @@
 #include <string.h>
 #include <wchar.h>
 #include <stdlib.h>
-#include <errno.h>
-#include <limits.h>
 
 void initialize_modules();
 void deinitialize_modules();
@@ -19,7 +17,7 @@ void run_cyclic();
 void send_list_req();
 void check_username(char * buff);
 void ask_to_play(char * buff);
-void check_confirm(char * buff);
+int check_confirm(char * buff);
 void handle_move(char * buff);
 void handle_server_data(char * msg);
 
@@ -61,58 +59,73 @@ void run_cyclic(){
 	int running = 1;
 	char buffer[1024];
 	while(running){
+
 		memset(buffer,0,1024);
-		int input_type = handle_inputs(user,buffer,1024);
+		int input_type = handle_inputs(user,buffer,1024); // read inputs
 
 		switch (input_type){
 		
-		case A_NO_ACTION:
+		case A_NO_ACTION: // no inputs read
 			break;	
 		
-		case A_REFRESH  :
-			if(get_state(user) == S_INIT){
+		case A_REFRESH  : // refresh asked from user
+			if(get_state(user) == S_INIT){ // re-try connection
 				if(initialize_network(CLIENT,PORT,ADDR) == 0) 
 					next_state = S_AUTH;
 				else next_state = S_INIT;
 			}
-			else if(get_state(user) == S_MENU){
+			else if(get_state(user) == S_MENU){ // reload avaialable players
 				send_list_req();
 			}
 			break; 
 		
-		case A_INCORRECT:
-			if(get_state(user) == S_AUTH){
+		case A_INCORRECT: 
+			if(get_state(user) == S_AUTH){ // server resonse for invalid username
 				next_state = S_AUTH;
 			}
-			else if(get_state(user) == S_PLAY){
+			else if(get_state(user) == S_PLAY){ //idk yet
 				get_board(get_user_game(user),board);
 				printBoard(board,"Invalid move!");
+			}else if(get_state(user) == S_WAIT){ // other player unavailable or declined
+				next_state = S_MENU;
 			}
 			break;	
 		
-		case A_USER_DATA:
-			if(get_state(user) == S_AUTH){
+		case A_USER_DATA: // user input
+			if(get_state(user) == S_AUTH){ // if authenticating, chek for username availability
 				check_username(buffer);
 			}
-			else if(get_state(user) == S_MENU){
+			else if(get_state(user) == S_MENU){ // if in menu, ask for other players for a game
 				ask_to_play(buffer);
 			}
-			else if(get_state(user) == S_CONF){
-				check_confirm(buffer);	
+			else if(get_state(user) == S_CONF){ // if confirmation needed, check for a valid answer
+				int conf = check_confirm(buffer);
+				char msg[1024];memset(msg,0,1024);
+				char *ans;
+				if(conf) ans = "1";
+				else ans = "0";
+				compose_message(msg,MV_GAME_REQ,get_username(user),ans);
+				write_data(0,msg);	
 			}
-			else if(get_state(user) == S_PLAY){
+			else if(get_state(user) == S_PLAY){ // if playing, validate move
 				handle_move(buffer);
+			}else if(get_state(user) == S_ENDG){ // if confirmation needed, check for a valid answer
+				int conf = check_confirm(buffer);
+				if(conf) next_state = S_MENU;
+				else next_state = S_EXIT;
 			}
 			break;	
 		
 		case A_CONF_REQ :
-			next_state = S_CONF;
+			if(get_state(user) == S_MENU){
+				next_state = S_CONF;
+			}
 			break; 
 		case A_QUIT     :
-			next_state = S_END;
+			next_state = S_EXIT;
 			break; 
 		case A_FORFEIT  :
-			next_state = S_MENU;
+			next_state = S_ENDG;
 			break; 
 		case A_SER_DATA :
 			handle_server_data(buffer);
@@ -122,7 +135,18 @@ void run_cyclic(){
 			break; 
 		case A_SER_DISC :
 			next_state = S_INIT;
+			break;
+		case A_CORRECT :
+			if(get_state(user) == S_AUTH){ // server confirmation for 
+				next_state = S_MENU;
+			}
 			break; 
+		case A_ST_GAME :
+			next_state = S_PLAY;
+			break;
+		case A_OP_LEFT :
+			next_state = S_ENDG;
+			break;
 		}
 
 		switch (next_state)
@@ -135,6 +159,7 @@ void run_cyclic(){
 			break;
 		case S_MENU:
 			printMessage("MENU");
+			send_list_req();
 			break;
 		case S_WAIT:
 			printMessage("Please wait for your opponent!");
@@ -144,9 +169,15 @@ void run_cyclic(){
 			break;
 		case S_PLAY:
 			get_board(get_user_game(user),board);
-			printBoard(board,"You are ... ");
+			if(get_player_color(get_user_game(user),user) == WHITE)
+				printBoard(board,"You are WHITE (left)");
+			else
+				printBoard(board,"You are BLACK (right)");
 			break;
-		case S_END:
+		case S_ENDG:
+			printMessage("Game ended! Do you want to return to the menu? (yes/no)");
+			break;
+		case S_EXIT:
 			printMessage("Goodbye!");
 			running = 0;
 			break;
@@ -160,10 +191,6 @@ void run_cyclic(){
 		next_state = -1;
 		
 	}
-}
-
-int get_int(char * buff){
-	return strtol(buff,NULL,10);
 }
 
 void get_user_list(char * buff,char **list){
@@ -189,18 +216,14 @@ void ask_to_play(char * buff){
 	next_state = S_WAIT;
 }
 
-void check_confirm(char * buff){
-	char msg[1024];
-	char *ans;
+int check_confirm(char * buff){
 	if(strcmp(buff,"yes\n") == 0){
-		ans = "1";
+		return 1;
 	}
 	else if(strcmp(buff,"no\n") == 0){
-		ans = "0";
+		return 0;
 	}
-
-	compose_message(msg,MV_GAME_REQ,get_username(user),ans);
-	write_data(0,msg);
+	return 0;
 }
 
 int validate_move(int x1,int x2, int x3, int x4){
@@ -237,67 +260,6 @@ void handle_move(char * buff){
 	else return;
 }
 void handle_server_data(char * msg){
-	int msg_type;
-	char server[100];memset(server,0,100);
-	char payload[1024];memset(payload,0,1024);
-	msg_type = decompose_message(msg,server,payload);
-	char users[100][100];
-	if(strcmp(server,"server")!=0)
-		return;
 	
-	switch(msg_type){
-	case MV_CONN_INIT   :
-		if(get_int(payload) && get_state(user) == S_AUTH) {
-			send_list_req();
-			next_state = S_MENU;
-		}else if(get_state(user) == S_AUTH){
-			next_state = S_AUTH;
-		}
-	break;
-	case MV_AV_USERS    : 
-		if(get_state(user) == S_MENU){
-			get_user_list(payload,users);
-			next_state = S_MENU;
-		}
-	break;
-	case MV_GAME_REQ    :
-		if(get_state(user) == S_MENU){
-			if(get_int(payload) == 2){
-				next_state = S_CONF;
-			}
-		} 
-		else if(get_state(user) == S_WAIT){
-			if(get_int(payload) == 0){
-				next_state = S_MENU;
-			}
-			if(get_int(payload) == 1){
-				// wait for color
-			}
-		}
-	break;
-	case MV_MAKE_MOVE   : 
-		if(get_state(user) == S_PLAY){
-			// get_board(get_user_game(user),board);
-			// movePiece(board); 
-		}
-	break;
-	case MV_SET_COLOR   :
-		if(get_state(user) == S_WAIT || get_state(user) == S_CONF){
-			// TODO initialize game
-		} 
-	break;
-	case MV_PLAYER_LEFT : 
-		if(get_state(user) == S_PLAY){
-			// TODO player left
-			next_state = S_MENU;
-		}
-	break;
-	case MV_ILLEGAL_MOVE: 
-		if(get_state(user) == S_PLAY){
-			// TODO illegal move
-		}
-	break;
-	}
-
 
 }

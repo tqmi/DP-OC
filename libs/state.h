@@ -7,8 +7,8 @@
 #define S_CONF 3
 #define S_WAIT 4
 #define S_PLAY 5
-#define S_END 6
-
+#define S_EXIT 6
+#define S_ENDG 7
 
 
 typedef struct user{

@@ -93,7 +93,7 @@ void set_state(t_user * c_user,int s)
 	// 	get_board(get_user_game(c_user),board);
 	// 	printBoard(board);
 	// 	break;
-	// case S_END:
+	// case S_EXIT:
 	// 	printMessage("Goodbye!");
 	// 	break;
 	// }

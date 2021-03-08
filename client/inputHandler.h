@@ -12,6 +12,9 @@
 #define A_SER_DATA  7
 #define A_ERROR     8
 #define A_SER_DISC  9
+#define A_CORRECT   10
+#define A_ST_GAME   11
+#define A_OP_LEFT   12
 
 int handle_inputs(t_user * c_user,char* buffer,int buff_size);
 

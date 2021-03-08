@@ -2,6 +2,7 @@
 #include "../libs/state.h"
 #include "../libs/network.h"
 #include "./serverWorker.h"
+#include "../libs/logic.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -11,6 +12,21 @@
 t_user **USERS;
 t_game **GAMES;
 int N_USERS;
+int N_GAMES;
+
+int get_int(char * buff){
+	return strtol(buff,NULL,10);
+}
+
+t_user * get_user_from_fd(int fd){
+    for(int i = 0 ; i < N_USERS ; ++i){
+        if(USERS[i]!=NULL && get_user_fd(USERS[i]) == fd ){
+            return USERS[i];
+        }
+    }
+    return NULL;
+}
+
 
 void requestHandler(char request[], char *response, int fileDesc)
 {
@@ -53,6 +69,7 @@ void requestHandler(char request[], char *response, int fileDesc)
                 compose_message(msg,MV_GAME_REQ,SERVER_ID,payload);
                 printf("%s\n",msg);
                 write_data(get_user_fd(USERS[other_player]),msg);
+                create_game(fileDesc,get_user_fd(USERS[other_player]));
             }else{
                 compose_message(msg,MV_GAME_REQ,SERVER_ID,"0");
                 write_data(fileDesc,msg);
@@ -61,11 +78,38 @@ void requestHandler(char request[], char *response, int fileDesc)
             /* code */
             break;
         case MV_GAME_REQ:
-            
-            /* code */
+            if(processGameReq(user, payload,fileDesc)){
+                set_turn(get_user_game(get_user_from_fd(fileDesc)),WHITE);
+                compose_message(msg,MV_SET_COLOR,SERVER_ID,"1");
+                write_data(get_user_fd(get_white_payer(get_user_game(get_user_from_fd(fileDesc)))),msg);
+                memset(msg,0,1024);
+                compose_message(msg,MV_SET_COLOR,SERVER_ID,"-1");
+                write_data(get_user_fd(get_black_payer(get_user_game(get_user_from_fd(fileDesc)))),msg);
+            }
+            else{
+
+                t_user * u = get_user_from_fd(fileDesc);
+                if(get_turn(get_user_game(u)) != 0)
+                    return;
+
+                compose_message(msg,MV_GAME_REQ,SERVER_ID,"0");
+                
+                write_data(get_user_fd(get_black_payer(get_user_game(u))),msg);
+                write_data(get_user_fd(get_white_payer(get_user_game(u))),msg);
+
+                // free(get_user_game(u));
+                //TODO : free game space
+                
+            }
+
             break;
         case MV_MAKE_MOVE:
-            /* code */
+            if(processMakeMove(user, payload,fileDesc)){
+
+            }
+            else{
+
+            }
             break;
         case MV_CONN_END:
             /* code */
@@ -144,3 +188,38 @@ int processPlayWith(char * user, char * payload, int fileDesc) // returns the in
     }
     return -1;
 }  
+
+void create_game(int fd1, int fd2){
+    t_user * u1 = NULL,*u2 = NULL;
+
+    for(int i = 0 ; i < N_USERS ; ++i){
+        if(get_user_fd(USERS[i]) == fd1 || get_user_fd(USERS[i]) == fd2){
+            u1 = u2;
+            u2 = USERS[i];
+        }
+    }
+    int free_slot = N_GAMES;
+    for(int i = 0 ; i < N_GAMES ; ++i){
+        if(GAMES[i] == NULL){
+            free_slot = i;
+        }
+    }
+    if(free_slot == N_GAMES){
+        GAMES = (t_game **) realloc(GAMES, (++N_GAMES) * sizeof(t_game *));
+    }
+
+    GAMES[free_slot] = init_state_game(u1,u2);
+    set_turn(GAMES[free_slot],0);
+
+}
+
+int processGameReq(char * user, char * payload, int fileDesc){
+    t_user *u = get_user_from_fd(fileDesc);
+    if(get_turn(get_user_game(u)) != 0)
+        return 0;
+    
+    if(get_int(payload)){
+        return 1;
+    }
+    else return 0;
+} 

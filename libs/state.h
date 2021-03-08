@@ -41,6 +41,8 @@ int get_wkmoved(t_game * c_game);
 void set_bkmoved(t_game * c_game, int v);
 int get_bkmoved(t_game * c_game);
 int get_player_color(t_game * c_game,t_user * c_user);
+t_user * get_white_payer(t_game * c_game);
+t_user * get_black_payer(t_game * c_game);
 t_user * init_state_user();
 int get_state(t_user * c_user);
 void set_state(t_user * c_user,int s);

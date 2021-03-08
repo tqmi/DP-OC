@@ -90,7 +90,7 @@ void run_cyclic(){
 			else if(get_state(user) == S_PLAY){ //idk yet
 				get_board(get_user_game(user),board);
 				printBoard(board,"Invalid move!");
-			}else if(get_state(user) == S_WAIT){ // other player unavailable or declined
+			}else if(get_state(user) == S_WAIT || get_state(user) == S_CONF){ // other player unavailable or declined
 				next_state = S_MENU;
 			}
 			break;	
@@ -223,13 +223,13 @@ void handle_game_request(char * msg){
 }
 
 void send_list_req(){
-	char msg[1024];
+	char msg[1024]= {0};
 	compose_message(msg,MV_AV_USERS,get_username(user),"");
 	write_data(0,msg);
 }
 
 void check_username(char * buff){
-	char msg[1024];
+	char msg[1024]= {0};
 	char * uname = strtok(buff,"\n ");
 	set_username(user,uname);
 	compose_message(msg,MV_CONN_INIT,strtok(buff,"\n "),"");
@@ -237,7 +237,7 @@ void check_username(char * buff){
 }
 
 void ask_to_play(char * buff){
-	char msg[1024];
+	char msg[1024] = {0};
 	char * uname = strtok(buff,"\n ");
 	compose_message(msg,MV_PLAY_WITH,get_username(user),uname);
 	write_data(0,msg);
@@ -281,6 +281,9 @@ void handle_move(char * buff){
 		start = end;
 		// wprintf(L"%d %d %d %d\n",x1,x2,x3,x4);
 		if(validate_move(x1,x2,x3,x4)){
+			char msg[1024] = {0};
+			compose_message(msg,MV_MAKE_MOVE,get_username(user),buff);
+			write_data(0,msg);
 			get_board(get_user_game(user),board);
 			printBoard(board,"Oponents turn");
 		}

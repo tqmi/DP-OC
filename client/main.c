@@ -148,6 +148,8 @@ void run_cyclic(){
 		case A_OP_LEFT :
 			next_state = S_ENDG;
 			break;
+		case A_LIST_USERS :
+			break;
 		}
 
 		switch (next_state)

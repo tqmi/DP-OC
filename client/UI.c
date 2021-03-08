@@ -197,16 +197,20 @@ void printBoard(int board[8][8],char *msg)
     
 }
 
-int get_keyboard_input(char * buffer, int bufflen){
-    int fd,rd;
-    if((rd = read_data(buffer,bufflen,&fd)) > 0){
-        if(fd == KEYBOARDIN){
-            return rd;
-        }else{
-            // TODO!!
+void printNameList(char **name_list, int length)
+{
+    systemClear();
+    
+    for (int i = 0; i < length; i++)
+        {
+            wprintf(L"%ld. %ls\n", i+1, name_list[i]);
         }
-	}
-    return 0;
+    wprintf(L"%ld. ", length+1);
+
+    red();
+    wprintf(L"EXIT\n");
+    reset();
+
 }
 
 // int main()
@@ -227,11 +231,8 @@ int get_keyboard_input(char * buffer, int bufflen){
 //             {1, 1, 1, 1, 1, 1, 1, 1},
 //             {4, 2, 3, 5, 6, 3, 2, 4}};
 
-//     printBoard(board);
-
-//     int answer= giveAnswer('N');
-
-//     wprintf(L"%ld\n",answer);
+//     char *name_list[4]={"Ana","Maria","Sorin", "Simona"};
+//     printNameList(name_list,4);
 
 
 //     return 0;

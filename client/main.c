@@ -151,8 +151,12 @@ void run_cyclic(){
 			next_state = S_PLAY;
 			break;
 		case A_OP_LEFT :
-			won = 1;
-			next_state = S_ENDG;
+			if (get_state(user) == S_PLAY){
+				won = 1;
+				next_state = S_ENDG;
+			}
+			else if(get_state(user) == S_CONF || get_state(user) == S_WAIT)
+				next_state = S_MENU;
 			break;
 		case A_LIST_USERS :
 			if(get_state(user) == S_MENU){
@@ -170,13 +174,13 @@ void run_cyclic(){
 		switch (next_state)
 		{
 		case S_INIT:
-			printMessage("Connectiong to the server failed or an error occured!\nType \"try again\" to retry connection or \"exit\" to exit!");
+			printMessage("Connectiong to the server failed or an error occured!\nType \"refresh\" to retry connection or \"exit\" to exit!");
 			break;
 		case S_AUTH:
 			printMessage("Please enter a username:");
 			break;
 		case S_MENU:
-			printMessage("MENU");
+			printMessage("Wait for opponents list. Type \"refresh\" to send request again!");
 			send_list_req();
 			break;
 		case S_WAIT:
@@ -201,7 +205,6 @@ void run_cyclic(){
 				printMessage("You WON! Do you want to return to the menu? (yes/no)");
 			else
 				printMessage("You LOST! Do you want to return to the menu? (yes/no)");
-			
 			break;
 		case S_EXIT:
 			printMessage("Goodbye!");

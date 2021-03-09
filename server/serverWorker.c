@@ -11,8 +11,8 @@
 
 t_user **USERS;
 t_game **GAMES;
-int N_USERS;
-int N_GAMES;
+int N_USERS = 0;
+int N_GAMES = 0;
 
 int get_int(char * buff){
 	return strtol(buff,NULL,10);
@@ -36,32 +36,33 @@ void requestHandler(char request[], char *response, int fileDesc, int connection
     char ret_val[1024] = {0};
     int other_player;
 
-    // if(connection == 0)
-    // {
-    //    for(int i = 0 ; i < N_USERS ; ++i)
-    //    {
-    //        if(get_user_fd(USERS[i]) == fileDesc)
-    //        {
-    //            set_state(USERS[i], DELETED);
-    //        }
-    //    }
+    if(connection == 0)
+    {
+       for(int i = 0 ; i < N_USERS ; ++i)
+       {
+           if(get_user_fd(USERS[i]) == fileDesc)
+           {
+               set_state(USERS[i], DELETED);
+           }
+       }
 
-    //    for(int i = 0 ; i < N_GAMES ; ++i)
-    //    {   
-    //        if(get_user_fd(get_white_player(GAMES[i])) == fileDesc)
-    //        {
-    //            // white player disconnected
-    //            compose_message(msg, MV_PLAYER_LEFT, SERVER_ID, get_username(get_white_player(GAMES[i])));
-    //            write_data(get_user_fd(get_black_player(GAMES[i])), msg);
-    //        }
-    //        else if(get_user_fd(get_black_player(GAMES[i])) == fileDesc)
-    //        {
-    //            // black player disconnected
-    //            compose_message(msg, MV_PLAYER_LEFT, SERVER_ID, get_username(get_black_player(GAMES[i])));
-    //            write_data(get_user_fd(get_white_player(GAMES[i])), msg);
-    //        }
-    //    }
-    // }
+       for(int i = 0 ; i < N_GAMES ; ++i)
+       {   
+           printf("%d %s %s\n",i,get_username(get_white_player(GAMES[i])),get_username(get_black_player(GAMES[i])));
+           if(get_user_fd(get_white_player(GAMES[i])) == fileDesc)
+           {
+               // white player disconnected
+               compose_message(msg, MV_PLAYER_LEFT, SERVER_ID, get_username(get_white_player(GAMES[i])));
+               write_data(get_user_fd(get_black_player(GAMES[i])), msg);
+           }
+           else if(get_user_fd(get_black_player(GAMES[i])) == fileDesc)
+           {
+               // black player disconnected
+               compose_message(msg, MV_PLAYER_LEFT, SERVER_ID, get_username(get_black_player(GAMES[i])));
+               write_data(get_user_fd(get_white_player(GAMES[i])), msg);
+           }
+       }
+    }
 
     switch (decompose_message(request, user, payload))
     {
@@ -196,7 +197,7 @@ void processAvUsers(char * user, char * payload, int fileDesc, char * av_users)
 
     for(int i = 0 ; i < N_USERS ; ++i)
     {
-        if(get_state(USERS[i]) != DELETED && get_user_fd(USERS[i]) != fileDesc)
+        if(get_state(USERS[i]) == ACTIVE && get_user_fd(USERS[i]) != fileDesc)
         {
             strcat(av_users,get_username(USERS[i]));
             strcat(av_users,",\0");

@@ -86,21 +86,26 @@ int movePiece(t_game * c_game,int x1, int y1, int x2, int y2)
     movePieceDirectly(x1, y1, x2, y2);
     alter_player_turn(c_game); //next player turn
 
+    // board = c_game->board;
+
     if (isKingChecked())
     {
-        if (isMate())
+        if (isMate()){
+            
             return 3;
-        else
+        }else{
             return 2;
+        }
     }
-    else
+    else{
         return 1;
+    }
 }
 
 //moves piece with no regards to rules
 void movePieceDirectly(int x1, int y1, int x2, int y2)
 {
-    wprintf(L"here\n");
+    // wprintf(L"here\n");
     //moving piece
     int pieceType = board[x1][y1];
     board[x2][y2] = pieceType;

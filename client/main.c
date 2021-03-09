@@ -31,13 +31,13 @@ int list_refresh_req = 0;
 int board[8][8];
 char o_uname[100];
 char aux[1024] = {0};
+int won = 0;
 
 int main(int argc, char const *argv[])
 {
 
 	initialize_modules();
 
-	// handle_move("A 4 h 3");
 	run_cyclic();
 
 	deinitialize_modules();
@@ -151,6 +151,7 @@ void run_cyclic(){
 			next_state = S_PLAY;
 			break;
 		case A_OP_LEFT :
+			won = 1;
 			next_state = S_ENDG;
 			break;
 		case A_LIST_USERS :
@@ -196,7 +197,11 @@ void run_cyclic(){
 				printBoard(board,"You are BLACK (right)");
 			break;
 		case S_ENDG:
-			printMessage("Game ended! Do you want to return to the menu? (yes/no)");
+			if(won)
+				printMessage("You WON! Do you want to return to the menu? (yes/no)");
+			else
+				printMessage("You LOST! Do you want to return to the menu? (yes/no)");
+			
 			break;
 		case S_EXIT:
 			printMessage("Goodbye!");
@@ -266,9 +271,9 @@ int validate_move(int x1,int x2, int x3, int x4){
 	if(x1 < 'a' || x1 > 'h' || x3 < 'a' || x3 > 'h' || x2 < 1 || x2 > 8 || x4 < 1 || x4 > 8)
 		return 0;
 
-	if(movePiece(get_user_game(user),x1,x2,x3,x4))
-	    return 1;
-    return 0;
+	
+
+	return movePiece(get_user_game(user),x1,x2,x3,x4);
 }
 
 void handle_move(char * buff){
@@ -284,21 +289,29 @@ void handle_move(char * buff){
 		int x4 = strtoll(start,&end,20);
 		start = end;
 		// wprintf(L"%d %d %d %d\n",x1,x2,x3,x4);
-		if(validate_move(x1,x2,x3,x4)){
+		int move =validate_move(x1,x2,x3,x4); 
+		if(move){
 			char msg[1024] = {0};
 			char aux[1024] = {0};
 			sprintf(aux,"%c,%d,%c,%d",x1-10+'A',x2,x3-10+'A',x4);
 			compose_message(msg,MV_MAKE_MOVE,get_username(user),aux);
 			write_data(0,msg);
 			get_board(get_user_game(user),board);
-			printBoard(board,"Oponents turn");
+			
+			if(move == 1)
+				printBoard(board,"Oponents turn.");
+			if(move == 2)
+				printBoard(board,"Oponents turn. CHECK!");
+			if(move == 3)
+				printBoard(board,"You WON!!");
+			if(move == 4)
+				printBoard(board,"Oponents turn. (pp)");//TODO : pawn promotion
 		}
 	}
 	else return;
 }
 
 void handle_server_move(char *msg){
-	wprintf(L"here\n");
 	char server[100] = {0};
 	char buff[1024] = {0};
 	decompose_message(msg,server,buff);
@@ -312,10 +325,18 @@ void handle_server_move(char *msg){
 		start = end+1;
 		int x4 = strtoll(start,&end,20);
 		start = end+1;
-		wprintf(L"%d %d %d %d\n",x1,x2,x3,x4);
-		if(validate_move(x1,x2,x3,x4)){
+		// wprintf(L"%d %d %d %d\n",x1,x2,x3,x4);
+		int move = validate_move(x1,x2,x3,x4);
+		if(move){
 			get_board(get_user_game(user),board);
-			printBoard(board,"Your turn!");
+			if(move == 1)
+				printBoard(board,"Your turn.");
+			if(move == 2)
+				printBoard(board,"Your turn. CHECK!");
+			if(move == 3)
+				printBoard(board,"You LOST!!");
+			if(move == 4)
+				printBoard(board,"Your turn. (pp)");//TODO : pawn promotion
 		}
 }
 void handle_server_data(char * msg){

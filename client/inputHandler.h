@@ -16,6 +16,7 @@
 #define A_ST_GAME   11
 #define A_OP_LEFT   12
 #define A_LIST_USERS 13
+#define A_MAKE_MOVE 14
 
 int handle_inputs(t_user * c_user,char* buffer,int buff_size);
 

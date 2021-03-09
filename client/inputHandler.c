@@ -88,9 +88,8 @@ int handle_server_input(t_user * c_user, char * msg){
 		}
 	break;
 	case MV_MAKE_MOVE   : // TODO
-		if(get_state(c_user) == S_PLAY){
-			// get_board(get_user_game(c_user),board);
-			// movePiece(board); 
+		if(get_state(c_user) == S_PLAY && get_turn(get_user_game(c_user)) != get_player_color(get_user_game(c_user),c_user)){
+			 return A_MAKE_MOVE;
 		}
 	break;
 	case MV_SET_COLOR   :

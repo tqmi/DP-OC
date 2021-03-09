@@ -6,7 +6,7 @@
 #define MH_PLAY_WITH 	"play_with"
 #define MH_GAME_REQ 	"game_request"
 #define MH_MAKE_MOVE 	"make_move"
-#define MH_CONN_END 	"conn_end"
+#define MH_FORFEIT 	    "forfeit"
 #define MH_SET_COLOR 	"set_color"
 #define MH_PLAYER_LEFT 	"player_left"
 #define MH_ILLEGAL_MOVE "illegal_move"
@@ -17,7 +17,7 @@
 #define MV_PLAY_WITH    2
 #define MV_GAME_REQ     3
 #define MV_MAKE_MOVE    4
-#define MV_CONN_END     5
+#define MV_FORFEIT      5
 #define MV_SET_COLOR    6
 #define MV_PLAYER_LEFT  7
 #define MV_ILLEGAL_MOVE 8

@@ -10,7 +10,10 @@ int main(int argc, char const *argv[])
 	char buffer[1024] = {0};
 	char buffer2[1024] = {0};
 	int connfd;
-	initialize_network(SERVER,PORT,ADDR);
+	if(!initialize_network(SERVER,PORT,ADDR))
+	{
+		printf("Network initialized\n");
+	}
 	while(1){
 		accept_connections();
 		memset(buffer,0,1024);

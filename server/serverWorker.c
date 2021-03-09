@@ -36,34 +36,36 @@ void requestHandler(char request[], char *response, int fileDesc, int connection
     char ret_val[1024] = {0};
     int other_player;
 
-    if(connection == 0)
-    {
-       for(int i = 0 ; i < N_USERS ; ++i)
-       {
-           if(get_user_fd(USERS[i]) == fileDesc)
-           {
-               set_state(USERS[i], DELETED);
-           }
-       }
+    // if(connection == 0)
+    // {
+    //    for(int i = 0 ; i < N_USERS ; ++i)
+    //    {
+    //        if(get_user_fd(USERS[i]) == fileDesc)
+    //        {
+    //            set_state(USERS[i], DELETED);
+    //        }
+    //    }
 
-       for(int i = 0 ; i < N_GAMES ; ++i)
-       {
-           int black_player;
-           if(get_user_fd(get_white_player(GAMES[i])) == fileDesc)
-           {
-               // smth for the white user
-           }
-           else if(get_user_fd(get_black_player(GAMES[i])) == fileDesc)
-           {
-               // smth for the black user
-           }
-       }
-    }
+    //    for(int i = 0 ; i < N_GAMES ; ++i)
+    //    {   
+    //        if(get_user_fd(get_white_player(GAMES[i])) == fileDesc)
+    //        {
+    //            // white player disconnected
+    //            compose_message(msg, MV_PLAYER_LEFT, SERVER_ID, get_username(get_white_player(GAMES[i])));
+    //            write_data(get_user_fd(get_black_player(GAMES[i])), msg);
+    //        }
+    //        else if(get_user_fd(get_black_player(GAMES[i])) == fileDesc)
+    //        {
+    //            // black player disconnected
+    //            compose_message(msg, MV_PLAYER_LEFT, SERVER_ID, get_username(get_black_player(GAMES[i])));
+    //            write_data(get_user_fd(get_white_player(GAMES[i])), msg);
+    //        }
+    //    }
+    // }
 
     switch (decompose_message(request, user, payload))
     {
         case MV_CONN_INIT:
-            // printf("%s%s", user, payload);
 
             if(processConnInit(user, payload, fileDesc))
             {
@@ -142,17 +144,8 @@ void requestHandler(char request[], char *response, int fileDesc, int connection
 
             }
             break;
-        case MV_CONN_END:
-            /* code */
-            break;
-        case MV_SET_COLOR:
-            /* code */
-            break;
-        case MV_PLAYER_LEFT:
-            /* code */
-            break;
-        case MV_ILLEGAL_MOVE:
-            /* code */
+        case MV_FORFEIT:
+            // processForfeit(user, payload, fileDesc);
             break;
         default:
             break;
@@ -263,3 +256,24 @@ int processMakeMove(char * user, char * payload, int fileDesc) //TODO : verify p
 {
     return 1;
 }
+
+// void processForfeit(char * user, char * payload, int fileDesc)
+// {
+//     char msg[1024] = {0};
+
+//     for(int i = 0 ; i < N_GAMES ; ++i)
+//     {   
+//         if(get_user_fd(get_white_player(GAMES[i])) == fileDesc)
+//         {
+//             // white player forfeited
+//             compose_message(msg, MV_FORFEIT, SERVER_ID, get_username(get_white_player(GAMES[i])));
+//             write_data(get_user_fd(get_black_player(GAMES[i])), msg);
+//         }
+//         else if(get_user_fd(get_black_player(GAMES[i])) == fileDesc)
+//         {
+//             // black player forfeited
+//             compose_message(msg, MV_FORFEIT, SERVER_ID, get_username(get_black_player(GAMES[i])));
+//             write_data(get_user_fd(get_white_player(GAMES[i])), msg);
+//         }
+//     }
+// }

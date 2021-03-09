@@ -11,7 +11,7 @@ int get_msg_type_from_name(const char * action)
     if(strcmp(action, MH_PLAY_WITH) == 0)    return MV_PLAY_WITH;
     if(strcmp(action, MH_GAME_REQ) == 0)     return MV_GAME_REQ;
     if(strcmp(action, MH_MAKE_MOVE) == 0)    return MV_MAKE_MOVE;
-    if(strcmp(action, MH_CONN_END) == 0)     return MV_CONN_END;
+    if(strcmp(action, MH_FORFEIT) == 0)      return MV_FORFEIT;
     if(strcmp(action, MH_SET_COLOR) == 0)    return MV_SET_COLOR;
     if(strcmp(action, MH_PLAYER_LEFT) == 0)  return MV_PLAYER_LEFT;
     if(strcmp(action, MH_ILLEGAL_MOVE) == 0) return MV_ILLEGAL_MOVE;
@@ -25,7 +25,7 @@ int get_msg_type_from_code(int code,char * type){
     if(code == MV_PLAY_WITH)    {strcpy(type,MH_PLAY_WITH);return 1;}
     if(code == MV_GAME_REQ)     {strcpy(type,MH_GAME_REQ);return 1;}
     if(code == MV_MAKE_MOVE)    {strcpy(type,MH_MAKE_MOVE);return 1;}
-    if(code == MV_CONN_END)     {strcpy(type,MH_CONN_END);return 1;}
+    if(code == MV_FORFEIT)      {strcpy(type,MH_FORFEIT);return 1;}
     if(code == MV_SET_COLOR)    {strcpy(type,MH_SET_COLOR);return 1;}
     if(code == MV_PLAYER_LEFT)  {strcpy(type,MH_PLAYER_LEFT);return 1;}
     if(code == MV_ILLEGAL_MOVE) {strcpy(type,MH_ILLEGAL_MOVE);return 1;}

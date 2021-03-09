@@ -4,7 +4,7 @@ client -> server :
 	which player you wanna play with		|	play_with <file_descriptor> <username>
 	game request/confirmation/decline		|	game_request <file_descriptor> <response> (0 for decline | 1 for accept | 2 for request)
 	game info (move to be made) : A 1 A 4	|	make_move <file_descriptor> <init_x> <init_y> <final_x> <final_y>
-	end connection request					|	conn_end <file_descriptor>
+	end connection request/forfeit			|	forfeit <file_descriptor>
 
 	
 server -> client : 

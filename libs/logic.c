@@ -134,10 +134,15 @@ void resizeCoord(int* x1, int* y1, int* x2, int* y2)
 
 //combines basic check and king check rules into one
 int fullCheck(int x1, int y1, int x2, int y2)
-{
+{ 
+    
+
     if (!basicCheck(x1, y1, x2, y2))
         return 0;
-
+    int pieceType = board[x1][y1];
+    //in case a player tries to move the enemy pieces
+    if (pieceType * get_turn(game) < 0)
+        return 0;
     //checks if the king will still be checked after making the move
     int pieceStart = board[x1][y1];
     int pieceEnd = board[x2][y2];
@@ -182,10 +187,7 @@ int basicCheck(int x1, int y1, int x2, int y2)
 
     int pieceType = board[x1][y1];
 
-    //in case a player tries to move the enemy pieces
-    if (pieceType * get_turn(game) < 0)
-        return 0;
-
+    
     switch (pieceType)
     {
     case BPAWN:

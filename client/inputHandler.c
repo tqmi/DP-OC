@@ -51,6 +51,8 @@ int handle_user_input(t_user * c_user, char * msg){
 	}
 	else if (strcmp(msg,"exit\n") == 0){
 		return A_QUIT;
+	}else if (strcmp(msg,"forfeit\n") == 0){
+		return A_FORFEIT;
 	}
 	return A_USER_DATA;
 }
@@ -108,6 +110,9 @@ int handle_server_input(t_user * c_user, char * msg){
 			// TODO illegal move
 		}
 	break;
+	case MV_FORFEIT:
+		return A_OP_LEFT;
+	break; 
 	}
 
 

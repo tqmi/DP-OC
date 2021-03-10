@@ -25,7 +25,7 @@ int main(int argc, char const *argv[])
 				requestHandler(buffer, buffer2, connfd, 0);
 			}
 			else{
-				// printf("%d %s\n",connfd,buffer);
+				printf("%d %s\n",connfd,buffer);
 				requestHandler(buffer, buffer2, connfd, 1);
 				// memset(buffer,0,1024);
 				// compose_message(buffer,MV_CONN_INIT,"server","1");

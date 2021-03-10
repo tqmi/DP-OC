@@ -22,6 +22,7 @@ void handle_move(char * buff);
 void handle_server_data(char * msg);
 void handle_game_request(char * msg);
 void handle_server_move(char *msg);
+void handle_forfeit();
 
 int running = 0;
 t_user * user;
@@ -131,7 +132,10 @@ void run_cyclic(){
 			next_state = S_EXIT;
 			break; 
 		case A_FORFEIT  :
-			next_state = S_ENDG;
+			if(get_state(user) == S_PLAY){
+				handle_forfeit();
+				next_state = S_ENDG;
+			}
 			break; 
 		case A_SER_DATA :
 			handle_server_data(buffer);
@@ -351,4 +355,11 @@ void handle_server_move(char *msg){
 void handle_server_data(char * msg){
 	
 
+}
+
+void handle_forfeit(){
+	won = 0;
+	char msg[1024] = {0};
+	compose_message(msg,MV_FORFEIT,get_username(user),"");
+	write_data(0,msg);
 }

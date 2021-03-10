@@ -95,7 +95,7 @@ void requestHandler(char request[], char *response, int fileDesc, int connection
                 strcat(payload,"2,");
                 strcat(payload,user);
                 compose_message(msg,MV_GAME_REQ,SERVER_ID,payload);
-                printf("%s\n",msg);
+                // printf("%s\n",msg);
                 write_data(get_user_fd(USERS[other_player]),msg);
                 create_game(fileDesc,get_user_fd(USERS[other_player]));
             }else{
@@ -139,14 +139,14 @@ void requestHandler(char request[], char *response, int fileDesc, int connection
                     write_data(get_user_fd(get_black_player(get_user_game(u))),msg);
                 else
                     write_data(get_user_fd(get_white_player(get_user_game(u))),msg);
-                printf("%s\n",msg);
+                // printf("%s\n",msg);
             }
             else{
 
             }
             break;
         case MV_FORFEIT:
-            // processForfeit(user, payload, fileDesc);
+            processForfeit(user, payload, fileDesc);
             break;
         default:
             break;
@@ -258,23 +258,36 @@ int processMakeMove(char * user, char * payload, int fileDesc) //TODO : verify p
     return 1;
 }
 
-// void processForfeit(char * user, char * payload, int fileDesc)
-// {
-//     char msg[1024] = {0};
+void processForfeit(char * user, char * payload, int fileDesc)
+{
+    char msg[1024] = {0};
 
-//     for(int i = 0 ; i < N_GAMES ; ++i)
-//     {   
-//         if(get_user_fd(get_white_player(GAMES[i])) == fileDesc)
-//         {
-//             // white player forfeited
-//             compose_message(msg, MV_FORFEIT, SERVER_ID, get_username(get_white_player(GAMES[i])));
-//             write_data(get_user_fd(get_black_player(GAMES[i])), msg);
-//         }
-//         else if(get_user_fd(get_black_player(GAMES[i])) == fileDesc)
-//         {
-//             // black player forfeited
-//             compose_message(msg, MV_FORFEIT, SERVER_ID, get_username(get_black_player(GAMES[i])));
-//             write_data(get_user_fd(get_white_player(GAMES[i])), msg);
-//         }
-//     }
-// }
+    t_user * u = get_user_from_fd(fileDesc);
+    t_game * game = get_user_game(u);
+    int p_color = get_player_color(game,u);
+    if(p_color == WHITE){
+        compose_message(msg, MV_FORFEIT, SERVER_ID, get_username(u));
+        write_data(get_user_fd(get_black_player(game)), msg);
+    }else{
+        compose_message(msg, MV_FORFEIT, SERVER_ID, get_username(u));
+        write_data(get_user_fd(get_white_player(game)), msg);
+    }
+
+
+
+    // for(int i = 0 ; i < N_GAMES ; ++i)
+    // {   
+    //     if(get_user_fd(get_white_player(GAMES[i])) == fileDesc)
+    //     {
+    //         // white player forfeited
+    //         compose_message(msg, MV_FORFEIT, SERVER_ID, get_username(get_white_player(GAMES[i])));
+    //         write_data(get_user_fd(get_black_player(GAMES[i])), msg);
+    //     }
+    //     else if(get_user_fd(get_black_player(GAMES[i])) == fileDesc)
+    //     {
+    //         // black player forfeited
+    //         compose_message(msg, MV_FORFEIT, SERVER_ID, get_username(get_black_player(GAMES[i])));
+    //         write_data(get_user_fd(get_white_player(GAMES[i])), msg);
+    //     }
+    // }
+}

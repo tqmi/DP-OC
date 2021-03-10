@@ -108,7 +108,7 @@ void requestHandler(char request[], int fileDesc, int connection)
                 set_turn(get_user_game(get_user_from_fd(fileDesc)),WHITE);
                 compose_message(msg,MV_SET_COLOR,SERVER_ID,"1");
                 write_data(get_user_fd(get_white_player(get_user_game(get_user_from_fd(fileDesc)))),msg);
-                memset(msg,0,1024);
+                memset(msg,0,MSG_SIZE);
                 compose_message(msg,MV_SET_COLOR,SERVER_ID,"-1");
                 write_data(get_user_fd(get_black_player(get_user_game(get_user_from_fd(fileDesc)))),msg);
             }

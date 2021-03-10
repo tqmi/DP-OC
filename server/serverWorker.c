@@ -10,9 +10,7 @@
 #define SERVER_ID "server"
 
 t_user **USERS;
-t_game **GAMES;
 int N_USERS = 0;
-int N_GAMES = 0;
 
 int get_int(char * buff){
 	return strtol(buff,NULL,10);
@@ -38,61 +36,27 @@ void requestHandler(char request[], char *response, int fileDesc, int connection
 
     if(connection == 0)
     {
-        t_game * stopped_game = NULL;
-        
-        for(int i = 0 ; i < N_USERS ; ++i)
-        {
-           if(get_user_fd(USERS[i]) == fileDesc)
-           {
-               stopped_game = get_user_game(USERS[i]);
-               set_state(USERS[i], DELETED);
-               
-               if(get_user_fd(get_black_player(stopped_game)) == fileDesc)
-               {
-                   set_state(get_user_from_fd(get_user_fd(get_white_player(stopped_game))), ACTIVE);
-               }
-               else
-               {
-                   set_state(get_user_from_fd(get_user_fd(get_black_player(stopped_game))), ACTIVE);
-               }
-           }
-        }
-        
-        int blk_fd = get_user_fd(get_black_player(stopped_game));
-        int wht_fd = get_user_fd(get_white_player(stopped_game));
-        char * blk_username = get_username(get_black_player(stopped_game));
-        char * wht_username = get_username(get_white_player(stopped_game));
 
-        free(stopped_game);
+        t_user * discU = get_user_from_fd(fileDesc);
+
+        if(get_state(discU) == PLAYING){
+            t_game * stopped_game = get_user_game(discU);
+            t_user * otherU = NULL;
+
+            if(get_player_color(stopped_game,discU) == WHITE)
+                otherU = get_black_player(stopped_game);
+            else
+                otherU = get_white_player(stopped_game);
+             
         
-        printf("%s %s\n",wht_username,blk_username);
-        if(wht_fd == fileDesc)
-        {
-            // white player disconnected
-            compose_message(msg, MV_PLAYER_LEFT, SERVER_ID, wht_username);
-            write_data(blk_fd, msg);
-        }
-        else if(blk_fd == fileDesc)
-        {
-            // black player disconnected
-            compose_message(msg, MV_PLAYER_LEFT, SERVER_ID, blk_username);
-            write_data(wht_fd, msg);
+            compose_message(msg,MV_PLAYER_LEFT,SERVER_ID,get_username(discU));
+            write_data(get_user_fd(otherU),msg);
+            set_state(otherU,ACTIVE);
+            free(stopped_game);
+
         }
 
-        for (int  i = 0 ; i < N_GAMES ; ++i)
-        {
-            if((get_state(get_white_player(GAMES[i])) == DELETED) || (get_state(get_black_player(GAMES[i])) == DELETED))
-            {
-                free(GAMES[i]);
-                for(int j = i ; j < (N_GAMES - 1) ; ++j)
-                {
-                    GAMES[j] = GAMES[j + 1];
-                }
-
-                N_GAMES--;
-                break;
-            }
-        }
+        set_state(discU,DELETED);
     }
 
     switch (decompose_message(request, user, payload))
@@ -126,15 +90,12 @@ void requestHandler(char request[], char *response, int fileDesc, int connection
                 strcat(payload,"2,");
                 strcat(payload,user);
                 compose_message(msg,MV_GAME_REQ,SERVER_ID,payload);
-                // printf("%s\n",msg);
                 write_data(get_user_fd(USERS[other_player]),msg);
                 create_game(fileDesc,get_user_fd(USERS[other_player]));
             }else{
                 compose_message(msg,MV_GAME_REQ,SERVER_ID,"0");
                 write_data(fileDesc,msg);
             }
-
-            /* code */
             break;
         case MV_GAME_REQ:
             if(processGameReq(user, payload,fileDesc)){
@@ -148,16 +109,16 @@ void requestHandler(char request[], char *response, int fileDesc, int connection
             else{
 
                 t_user * u = get_user_from_fd(fileDesc);
-                if(get_turn(get_user_game(u)) != 0)
+                if(get_state(u) != PLAYING || get_turn(get_user_game(u)) != 0)
                     return;
-
+                
+                t_game * game = get_user_game(u);
                 compose_message(msg,MV_GAME_REQ,SERVER_ID,"0");
                 
-                write_data(get_user_fd(get_black_player(get_user_game(u))),msg);
-                write_data(get_user_fd(get_white_player(get_user_game(u))),msg);
+                write_data(get_user_fd(get_black_player(game)),msg);
+                write_data(get_user_fd(get_white_player(game)),msg);
 
-                // free(get_user_game(u));
-                //TODO : free game space
+                free(game);
                 
             }
 
@@ -170,7 +131,6 @@ void requestHandler(char request[], char *response, int fileDesc, int connection
                     write_data(get_user_fd(get_black_player(get_user_game(u))),msg);
                 else
                     write_data(get_user_fd(get_white_player(get_user_game(u))),msg);
-                // printf("%s\n",msg);
             }
             else{
 
@@ -179,7 +139,8 @@ void requestHandler(char request[], char *response, int fileDesc, int connection
         case MV_FORFEIT:
             processForfeit(user, payload, fileDesc);
             break;
-        default:
+        case MV_END_GAME :
+            processEndGame(user,payload,fileDesc); 
             break;
     }
 }
@@ -196,12 +157,10 @@ int processConnInit(char * user, char * payload, int fileDesc)
         }
         else
         {
-            // printf("%s %s", get_username(USERS[i]), user);
+
             if(strcmp(get_username(USERS[i]), user) == 0)
-            {
-                // printf("in if\n");
                 return 0;
-            }
+            
         }
     }
 
@@ -251,6 +210,7 @@ int processPlayWith(char * user, char * payload, int fileDesc) // returns the in
 
 void create_game(int fd1, int fd2){
     t_user * u1 = NULL,*u2 = NULL;
+    t_game * game;
 
     for(int i = 0 ; i < N_USERS ; ++i){
         if(get_user_fd(USERS[i]) == fd1 || get_user_fd(USERS[i]) == fd2){
@@ -259,24 +219,16 @@ void create_game(int fd1, int fd2){
             set_state(USERS[i], PLAYING);
         }
     }
-    int free_slot = N_GAMES;
-    for(int i = 0 ; i < N_GAMES ; ++i){
-        if(GAMES[i] == NULL){
-            free_slot = i;
-        }
-    }
-    if(free_slot == N_GAMES){
-        GAMES = (t_game **) realloc(GAMES, (++N_GAMES) * sizeof(t_game *));
-    }
-
-    GAMES[free_slot] = init_state_game(u1,u2);
-    set_turn(GAMES[free_slot],0);
-
+    set_state(u1,PLAYING);
+    set_state(u2,PLAYING);
+    game = init_state_game(u1,u2);
+    set_turn(game,0);
 }
 
 int processGameReq(char * user, char * payload, int fileDesc){
     t_user *u = get_user_from_fd(fileDesc);
-    if(get_turn(get_user_game(u)) != 0)
+    
+    if(get_state(u) != PLAYING || get_turn(get_user_game(u)) != 0)
         return 0;
     
     if(get_int(payload)){
@@ -294,32 +246,32 @@ void processForfeit(char * user, char * payload, int fileDesc)
 {
     char msg[1024] = {0};
 
-    t_user * u = get_user_from_fd(fileDesc);
-    t_game * game = get_user_game(u);
-    int p_color = get_player_color(game,u);
-    if(p_color == WHITE){
-        compose_message(msg, MV_FORFEIT, SERVER_ID, get_username(u));
-        write_data(get_user_fd(get_black_player(game)), msg);
-    }else{
-        compose_message(msg, MV_FORFEIT, SERVER_ID, get_username(u));
-        write_data(get_user_fd(get_white_player(game)), msg);
-    }
+    t_user * u1 = get_user_from_fd(fileDesc);
+    t_user * u2 = NULL;
+    t_game * game = get_user_game(u1);
+    int p_color = get_player_color(game,u1);
+    if(p_color == WHITE)
+        u2 = get_black_player(game);
+    else
+        u2 = get_white_player(game);
+    
+    compose_message(msg, MV_FORFEIT, SERVER_ID, get_username(u1));
+    write_data(get_user_fd(u2), msg);
+    set_state(u1,ACTIVE);
+    set_state(u2,ACTIVE);
+    free(game);
+}
 
-
-
-    // for(int i = 0 ; i < N_GAMES ; ++i)
-    // {   
-    //     if(get_user_fd(get_white_player(GAMES[i])) == fileDesc)
-    //     {
-    //         // white player forfeited
-    //         compose_message(msg, MV_FORFEIT, SERVER_ID, get_username(get_white_player(GAMES[i])));
-    //         write_data(get_user_fd(get_black_player(GAMES[i])), msg);
-    //     }
-    //     else if(get_user_fd(get_black_player(GAMES[i])) == fileDesc)
-    //     {
-    //         // black player forfeited
-    //         compose_message(msg, MV_FORFEIT, SERVER_ID, get_username(get_black_player(GAMES[i])));
-    //         write_data(get_user_fd(get_white_player(GAMES[i])), msg);
-    //     }
-    // }
+void processEndGame(char * user, char * payload, int fileDesc){
+    t_user * u1 = get_user_from_fd(fileDesc);
+    t_user * u2 = NULL;
+    t_game * game = get_user_game(u1);
+    int p_color = get_player_color(game,u1);
+    if(p_color == WHITE)
+        u2 = get_black_player(game);
+    else
+        u2 = get_white_player(game);
+    set_state(u1,ACTIVE);
+    set_state(u2,ACTIVE);
+    free(game);
 }

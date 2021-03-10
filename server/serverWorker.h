@@ -9,3 +9,4 @@ int processConnInit(char * user, char * payload, int fileDesc);
 int processPlayWith(char * user, char * payload, int fileDesc);
 int processGameReq(char * user, char * payload, int fileDesc);
 int processMakeMove(char * user, char * payload, int fileDesc);
+void processEndGame(char * user, char * payload, int fileDesc);

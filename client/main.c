@@ -311,6 +311,9 @@ void handle_move(char * buff){
 				printBoard(board,"Oponents turn. CHECK!");
 			if(move == 3)
 			{
+				memset(msg,0,1024);
+				compose_message(msg,MV_END_GAME,get_username(user),"");
+				write_data(0,msg);
 				won = 1;
 				next_state = S_ENDG;
 			}

@@ -10,6 +10,7 @@
 #define MH_SET_COLOR 	"set_color"
 #define MH_PLAYER_LEFT 	"player_left"
 #define MH_ILLEGAL_MOVE "illegal_move"
+#define MH_END_GAME		"end_game"
 #define SEP " "
 
 #define MV_CONN_INIT    0
@@ -21,6 +22,7 @@
 #define MV_SET_COLOR    6
 #define MV_PLAYER_LEFT  7
 #define MV_ILLEGAL_MOVE 8
+#define MV_END_GAME		9
 
 int decompose_message(const char *message,char * user, char* payload);
 int compose_message(char* msg, int msgType, const char* user,char* payload);

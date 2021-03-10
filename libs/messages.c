@@ -15,6 +15,7 @@ int get_msg_type_from_name(const char * action)
     if(strcmp(action, MH_SET_COLOR) == 0)    return MV_SET_COLOR;
     if(strcmp(action, MH_PLAYER_LEFT) == 0)  return MV_PLAYER_LEFT;
     if(strcmp(action, MH_ILLEGAL_MOVE) == 0) return MV_ILLEGAL_MOVE;
+    if(strcmp(action, MH_END_GAME) == 0)     return MV_END_GAME;
 
     return -1;
 }
@@ -29,6 +30,7 @@ int get_msg_type_from_code(int code,char * type){
     if(code == MV_SET_COLOR)    {strcpy(type,MH_SET_COLOR);return 1;}
     if(code == MV_PLAYER_LEFT)  {strcpy(type,MH_PLAYER_LEFT);return 1;}
     if(code == MV_ILLEGAL_MOVE) {strcpy(type,MH_ILLEGAL_MOVE);return 1;}
+    if(code == MV_END_GAME)     {strcpy(type,MH_END_GAME);return 1;}
 	return -1;
 }
 

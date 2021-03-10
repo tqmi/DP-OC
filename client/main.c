@@ -306,7 +306,10 @@ void handle_move(char * buff){
 			if(move == 2)
 				printBoard(board,"Oponents turn. CHECK!");
 			if(move == 3)
-				printBoard(board,"You WON!!");
+			{
+				won = 1;
+				next_state = S_ENDG;
+			}
 			if(move == 4)
 				printBoard(board,"Oponents turn. (pp)");//TODO : pawn promotion
 		}
@@ -337,7 +340,10 @@ void handle_server_move(char *msg){
 			if(move == 2)
 				printBoard(board,"Your turn. CHECK!");
 			if(move == 3)
-				printBoard(board,"You LOST!!");
+			{
+				won = 0;
+				next_state = S_ENDG;
+			}
 			if(move == 4)
 				printBoard(board,"Your turn. (pp)");//TODO : pawn promotion
 		}

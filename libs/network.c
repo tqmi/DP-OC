@@ -39,14 +39,11 @@ int initialize_network(int type,int port,char* addr){
 		break;
 	}
 	return 0;
-	
-	
 }
 
 int initialize_socket(int port,int queue_len, int * sockfd){
 	if ((*sockfd = socket(AF_INET, SOCK_STREAM, 0)) == 0) 
     { 
-		// printf("\n Socket creation error \n");
 		return 1;
     }
 	struct sockaddr_in address;
@@ -56,13 +53,11 @@ int initialize_socket(int port,int queue_len, int * sockfd){
 	if (bind(*sockfd, (struct sockaddr *)&address,  
                                  sizeof(address))<0) 
     { 
-		// printf("\n Socket binding error \n");
 		return 2; 
     }    
 
 	if (listen(*sockfd, queue_len) < 0) 
     { 
-		// printf("\n Socket listening error \n");
 		return 3; 
     } 
 	connectionfd -> fd = *sockfd;
@@ -105,25 +100,30 @@ int accept_connections(){
 }
 
 int connect_to_server(int port, char* addr, int * sockfd){
-	// printf("connecting to server\n");
 	struct sockaddr_in serv_addr; 
 	if ((*sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0) 
-    { 
-        // printf("\n Socket creation error \n"); 
+    {  
         return 1; 
     } 
 	serv_addr.sin_family = AF_INET; 
 	serv_addr.sin_addr.s_addr = inet_addr(addr);
     serv_addr.sin_port = htons(port); 
 	if (connect(*sockfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) 
-    { 
-        // printf("\nConnection Failed \n"); 
+    {  
         return 2; 
     } 
 	return 0;
 }
 
-
+/* Reads data from clientsfd descriptor set
+ * returns number of bytes read
+ * reads bufflen bytes in buffer
+ * saves originating file descriptor in fd
+ * retval < 0 -> error
+ * retval == 0 and fd == -1 -> no data available
+ * retval == 0 and fd >= 0 -> connection described by fd no longer available
+ * retval > 0 -> bytes read
+ */
 int read_data(char * buffer, int bufflen,int * fd){
 
 	int conn_ready = 0;
@@ -140,12 +140,10 @@ int read_data(char * buffer, int bufflen,int * fd){
 				if((rd = read(clientsfd[i].fd,buffer,bufflen)) <= 0){
 					clientsfd[i].fd = -1;
 					clientsfd[i].revents = 0;
-					// printf("client disconnected\n");
+
 					return 0;
 				}
 				return rd;
-				// printf(buffer);
-				// fflush(stdout);
 			}
 			
 		}
@@ -155,8 +153,7 @@ int read_data(char * buffer, int bufflen,int * fd){
 	return 0;
 }
 
-int write_data(int sockfd,const char const* data){
-	// printf("writing data\n");
+int write_data(int sockfd,const char * data){
 	if(conn_type == CLIENT)
 		sockfd = clientsfd[1].fd;
 	send(sockfd,data,strlen(data),0);

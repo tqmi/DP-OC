@@ -6,6 +6,8 @@
 #include <string.h>
 #include "UI.h"
 #include <stdlib.h>
+char server[MSG_ID_SIZE];
+char payload[MSG_PAYLOAD_SIZE];
 
 int handle_user_input(t_user * c_user, char * msg);
 int handle_server_input(t_user * c_user, char * msg);
@@ -60,10 +62,10 @@ int handle_user_input(t_user * c_user, char * msg){
 int handle_server_input(t_user * c_user, char * msg){
 
 	int msg_type;
-	char server[100];memset(server,0,100);
-	char payload[1024];memset(payload,0,1024);
+	memset(server,0,MSG_ID_SIZE);
+	memset(payload,0,MSG_PAYLOAD_SIZE);
 	msg_type = decompose_message(msg,server,payload);
-	// char users[100][100];
+	
 	if(strcmp(server,"server")!=0)
 		return A_NO_ACTION;
 	

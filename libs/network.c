@@ -44,7 +44,6 @@ int initialize_network(int type,int port,char* addr){
 int initialize_socket(int port,int queue_len, int * sockfd){
 	if ((*sockfd = socket(AF_INET, SOCK_STREAM, 0)) == 0) 
     { 
-		// printf("\n Socket creation error \n");
 		return 1;
     }
 	struct sockaddr_in address;
@@ -54,13 +53,11 @@ int initialize_socket(int port,int queue_len, int * sockfd){
 	if (bind(*sockfd, (struct sockaddr *)&address,  
                                  sizeof(address))<0) 
     { 
-		// printf("\n Socket binding error \n");
 		return 2; 
     }    
 
 	if (listen(*sockfd, queue_len) < 0) 
     { 
-		// printf("\n Socket listening error \n");
 		return 3; 
     } 
 	connectionfd -> fd = *sockfd;
@@ -103,19 +100,16 @@ int accept_connections(){
 }
 
 int connect_to_server(int port, char* addr, int * sockfd){
-	// printf("connecting to server\n");
 	struct sockaddr_in serv_addr; 
 	if ((*sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0) 
-    { 
-        // printf("\n Socket creation error \n"); 
+    {  
         return 1; 
     } 
 	serv_addr.sin_family = AF_INET; 
 	serv_addr.sin_addr.s_addr = inet_addr(addr);
     serv_addr.sin_port = htons(port); 
 	if (connect(*sockfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) 
-    { 
-        // printf("\nConnection Failed \n"); 
+    {  
         return 2; 
     } 
 	return 0;
@@ -160,7 +154,6 @@ int read_data(char * buffer, int bufflen,int * fd){
 }
 
 int write_data(int sockfd,const char * data){
-	// printf("writing data\n");
 	if(conn_type == CLIENT)
 		sockfd = clientsfd[1].fd;
 	send(sockfd,data,strlen(data),0);

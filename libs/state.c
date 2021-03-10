@@ -82,32 +82,6 @@ int get_state(t_user * c_user){
 
 void set_state(t_user * c_user,int s)
 {
-	// switch (s)
-	// {
-	// case S_INIT:
-	// 	break;
-	// case S_AUTH:
-	// 	printMessage("Enter your username :");
-	// 	break;
-	// case S_MENU:
-	// 	printMessage("You are in the menu!\nType exit to exit!");
-	// 	break;
-	// case S_WAIT:
-	// 	printMessage("Please wait for your opponent to accept invitation!");
-	// 	break;
-	// case S_CONF:
-	// 	printMessage("Do you want to play with ... ? (yes/no)");
-	// 	break;
-	// case S_PLAY:
-	// 	init_state_game(c_user,NULL);
-	// 	int board[8][8];
-	// 	get_board(get_user_game(c_user),board);
-	// 	printBoard(board);
-	// 	break;
-	// case S_EXIT:
-	// 	printMessage("Goodbye!");
-	// 	break;
-	// }
 	c_user -> state = s;
 }
 

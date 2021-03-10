@@ -12,10 +12,12 @@
 t_user **USERS;
 int N_USERS = 0;
 
+// return an int from buffer
 int get_int(char * buff){
 	return strtol(buff,NULL,10);
 }
 
+// return a user pointer based on a file descriptor 
 t_user * get_user_from_fd(int fd){
     for(int i = 0 ; i < N_USERS ; ++i){
         if(USERS[i]!=NULL && get_user_fd(USERS[i]) == fd ){
@@ -25,13 +27,17 @@ t_user * get_user_from_fd(int fd){
     return NULL;
 }
 
+char msg[MSG_SIZE] = {0};
+char user[MSG_ID_SIZE] = {0};
+char payload[MSG_PAYLOAD_SIZE] = {0};
+char ret_val[MSG_PAYLOAD_SIZE] = {0};
 
-void requestHandler(char request[], char *response, int fileDesc, int connection)
+void requestHandler(char request[], int fileDesc, int connection)
 {
-    char user[128] = {0};
-    char payload[1024] = {0};
-    char msg[1024] = {0};
-    char ret_val[1024] = {0};
+    memset(msg,0,MSG_SIZE);
+    memset(user,0,MSG_ID_SIZE);
+    memset(payload,0,MSG_PAYLOAD_SIZE);
+
     int other_player;
 
     if(connection == 0)
@@ -86,7 +92,7 @@ void requestHandler(char request[], char *response, int fileDesc, int connection
             
             if((other_player = processPlayWith(user,payload,fileDesc)) >= 0) //returns -1 if not ok and >= 0 if ok
             {
-                memset(payload,0,1024);
+                memset(payload,0,MSG_PAYLOAD_SIZE);
                 strcat(payload,"2,");
                 strcat(payload,user);
                 compose_message(msg,MV_GAME_REQ,SERVER_ID,payload);
@@ -184,7 +190,7 @@ int processConnInit(char * user, char * payload, int fileDesc)
 
 void processAvUsers(char * user, char * payload, int fileDesc, char * av_users)
 {
-
+    memset(av_users,0,MSG_PAYLOAD_SIZE);
     for(int i = 0 ; i < N_USERS ; ++i)
     {
         if(get_state(USERS[i]) == ACTIVE && get_user_fd(USERS[i]) != fileDesc)
@@ -244,7 +250,7 @@ int processMakeMove(char * user, char * payload, int fileDesc) //TODO : verify p
 
 void processForfeit(char * user, char * payload, int fileDesc)
 {
-    char msg[1024] = {0};
+    memset(msg,0,MSG_SIZE);
 
     t_user * u1 = get_user_from_fd(fileDesc);
     t_user * u2 = NULL;

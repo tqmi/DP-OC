@@ -3,6 +3,8 @@
 #include <string.h>
 #include <stdio.h>
 
+char aux[MSG_SIZE];
+char type[MSG_TYPE_SIZE];
 //returns the numeric code of the message type or -1 otherwise
 int get_msg_type_from_name(const char * action)
 {
@@ -36,15 +38,14 @@ int get_msg_type_from_code(int code,char * type){
 
 //returns the originating user,payload and message type(numeric code) or -1 otherwise
 int decompose_message(const char* message,char* user, char* payload){
-    char aux[1024];  strcpy(aux, message);
+    memset(aux,0,MSG_SIZE);
+    memset(type,0,MSG_TYPE_SIZE);
+    strcpy(aux, message);
     char *tok;
-    char action[100];
-    // char params[128][30];
-
     tok = strtok(aux, SEP);
 
     if(tok != NULL) {
-	    strcpy(action, tok);
+	    strcpy(type, tok);
     }
 
     tok = strtok(NULL, SEP);
@@ -59,11 +60,11 @@ int decompose_message(const char* message,char* user, char* payload){
 	    strcpy(payload,tok);
     }
 
-	return get_msg_type_from_name(action);
+	return get_msg_type_from_name(type);
 }
 
 int compose_message(char* msg, int msgType, const char* user,char* payload){
-	char type[100];
+	memset(type,0,MSG_TYPE_SIZE);
 	if(get_msg_type_from_code(msgType,type) >=0 ){
 		strcpy(msg,type);
 		strcat(msg,SEP);
@@ -75,22 +76,3 @@ int compose_message(char* msg, int msgType, const char* user,char* payload){
 	return -1;
 }
 
-
-// int main(int argc, char const *argv[])
-// {
-// 	char msg[100] ="conn_init tqmi something nice!\n";
-// 	char user[100];
-// 	char payload[100];
-
-// 	int ac = decompose_message(msg,user,payload);
-
-// 	printf("%d\n%s\n%s",ac,user,payload);
-
-// 	memset(msg,0,100);
-
-// 	compose_message(msg,4,"server","there there");
-
-// 	printf("%s\n",msg);
-
-// 	return 0;
-// }

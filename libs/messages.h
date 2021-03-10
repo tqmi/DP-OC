@@ -24,6 +24,11 @@
 #define MV_ILLEGAL_MOVE 8
 #define MV_END_GAME		9
 
+#define MSG_SIZE 1024
+#define MSG_TYPE_SIZE 32
+#define MSG_ID_SIZE 128
+#define MSG_PAYLOAD_SIZE 862 // its 2 less because there are 2 separator spaces
+
 int decompose_message(const char *message,char * user, char* payload);
 int compose_message(char* msg, int msgType, const char* user,char* payload);
 

@@ -14,9 +14,10 @@
 #define ACTIVE  1
 #define PLAYING 2
 
+#include "messages.h"
 
 typedef struct user{
-	char username [100];
+	char username [MSG_ID_SIZE];
 	int fd;
 	int state;
 	struct game * game;

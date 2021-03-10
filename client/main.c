@@ -24,16 +24,17 @@ void handle_game_request(char * msg);
 void handle_server_move(char *msg);
 void handle_forfeit();
 
-int running = 0;
 t_user * user;
 int next_state = 0;
 char ** oplayers;
-int list_refresh_req = 0;
+// int list_refresh_req = 0;
 int board[8][8];
-char o_uname[100];
+char o_uname[MSG_ID_SIZE];
 char aux[1024] = {0};
 int won = 0;
-
+char msg[MSG_SIZE];
+char server[MSG_ID_SIZE];
+char payload[MSG_PAYLOAD_SIZE];
 int main(int argc, char const *argv[])
 {
 
@@ -62,11 +63,11 @@ void deinitialize_modules(){
 
 void run_cyclic(){
 	int running = 1;
-	char buffer[1024];
+	char buffer[MSG_SIZE];
 	while(running){
 
-		memset(buffer,0,1024);
-		int input_type = handle_inputs(user,buffer,1024); // read inputs
+		memset(buffer,0,MSG_SIZE);
+		int input_type = handle_inputs(user,buffer,MSG_SIZE); // read inputs
 
 		switch (input_type){
 		
@@ -106,7 +107,7 @@ void run_cyclic(){
 			}
 			else if(get_state(user) == S_CONF){ // if confirmation needed, check for a valid answer
 				int conf = check_confirm(buffer);
-				char msg[1024];memset(msg,0,1024);
+				memset(msg,0,MSG_SIZE);
 				char *ans;
 				if(conf) ans = "1";
 				else ans = "0";
@@ -164,10 +165,10 @@ void run_cyclic(){
 			break;
 		case A_LIST_USERS :
 			if(get_state(user) == S_MENU){
-				char server[100] = {0};
-				char av_users[1024] = {0};
-				decompose_message(buffer,server,av_users);
-				printNameList(av_users);
+				memset(server,0,MSG_ID_SIZE);
+				memset(payload,0,MSG_PAYLOAD_SIZE);
+				decompose_message(buffer,server,payload);
+				printNameList(payload);
 			}
 			break;
 		case A_MAKE_MOVE :
@@ -227,8 +228,9 @@ void run_cyclic(){
 }
 
 void handle_game_request(char * msg){
-	char server[100] = {0};
-	char payload[1024] = {0};
+	
+	memset(server,0,MSG_ID_SIZE);
+	memset(payload,0,MSG_PAYLOAD_SIZE);
 
 	decompose_message(msg,server,payload);
 	char * tok = strtok(payload,",");
@@ -239,13 +241,13 @@ void handle_game_request(char * msg){
 }
 
 void send_list_req(){
-	char msg[1024]= {0};
+	memset(msg,0,MSG_SIZE);
 	compose_message(msg,MV_AV_USERS,get_username(user),"");
 	write_data(0,msg);
 }
 
 void check_username(char * buff){
-	char msg[1024]= {0};
+	memset(msg,0,MSG_SIZE);
 	char * uname = strtok(buff,"\n ");
 	set_username(user,uname);
 	compose_message(msg,MV_CONN_INIT,strtok(buff,"\n "),"");
@@ -253,7 +255,8 @@ void check_username(char * buff){
 }
 
 void ask_to_play(char * buff){
-	char msg[1024] = {0};
+	
+	memset(msg,0,MSG_SIZE);
 	char * uname = strtok(buff,"\n ");
 	compose_message(msg,MV_PLAY_WITH,get_username(user),uname);
 	write_data(0,msg);
@@ -298,10 +301,11 @@ void handle_move(char * buff){
 		// wprintf(L"%d %d %d %d\n",x1,x2,x3,x4);
 		int move =validate_move(x1,x2,x3,x4); 
 		if(move){
-			char msg[1024] = {0};
-			char aux[1024] = {0};
-			sprintf(aux,"%c,%d,%c,%d",x1-10+'A',x2,x3-10+'A',x4);
-			compose_message(msg,MV_MAKE_MOVE,get_username(user),aux);
+			
+			memset(msg,0,MSG_SIZE);
+			memset(payload,0,MSG_PAYLOAD_SIZE);
+			sprintf(payload,"%c,%d,%c,%d",x1-10+'A',x2,x3-10+'A',x4);
+			compose_message(msg,MV_MAKE_MOVE,get_username(user),payload);
 			write_data(0,msg);
 			get_board(get_user_game(user),board);
 			
@@ -325,10 +329,10 @@ void handle_move(char * buff){
 }
 
 void handle_server_move(char *msg){
-	char server[100] = {0};
-	char buff[1024] = {0};
-	decompose_message(msg,server,buff);
-	char * start = buff;
+	memset(msg,0,MSG_SIZE);
+	memset(payload,0,MSG_PAYLOAD_SIZE);
+	decompose_message(msg,server,payload);
+	char * start = payload;
 		char * end;
 		int x1 = strtoll(start,&end,20);
 		start = end+1;
@@ -356,13 +360,11 @@ void handle_server_move(char *msg){
 		}
 }
 void handle_server_data(char * msg){
-	
-
 }
 
 void handle_forfeit(){
 	won = 0;
-	char msg[1024] = {0};
+	memset(msg,0,MSG_SIZE);
 	compose_message(msg,MV_FORFEIT,get_username(user),"");
 	write_data(0,msg);
 }

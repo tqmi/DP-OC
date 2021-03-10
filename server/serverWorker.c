@@ -222,7 +222,6 @@ void create_game(int fd1, int fd2){
         if(get_user_fd(USERS[i]) == fd1 || get_user_fd(USERS[i]) == fd2){
             u1 = u2;
             u2 = USERS[i];
-            set_state(USERS[i], PLAYING);
         }
     }
     set_state(u1,PLAYING);

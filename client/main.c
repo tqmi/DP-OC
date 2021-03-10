@@ -329,7 +329,7 @@ void handle_move(char * buff){
 }
 
 void handle_server_move(char *msg){
-	memset(msg,0,MSG_SIZE);
+	memset(server,0,MSG_ID_SIZE);
 	memset(payload,0,MSG_PAYLOAD_SIZE);
 	decompose_message(msg,server,payload);
 	char * start = payload;

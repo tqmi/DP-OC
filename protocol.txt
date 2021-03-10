@@ -1,18 +1,18 @@
 client -> server :
-	username -> connection init				|	conn_init <file_descriptor> <username>
-	ask for eligible users to play with		|	av_users <file_descriptor>
-	which player you wanna play with		|	play_with <file_descriptor> <username>
-	game request/confirmation/decline		|	game_request <file_descriptor> <response> (0 for decline | 1 for accept | 2 for request)
-	game info (move to be made) : A 1 A 4	|	make_move <file_descriptor> <init_x> <init_y> <final_x> <final_y>
-	end connection request/forfeit			|	forfeit <file_descriptor>
+	username -> connection init				|	conn_init <user_id> <username>
+	ask for eligible users to play with		|	av_users <user_id>
+	which player you wanna play with		|	play_with <user_id> <username>
+	game request/confirmation/decline		|	game_request <user_id> <response> (0 for decline | 1 for accept | 2 for request)
+	game info (move to be made) : A 1 A 4	|	make_move <user_id> <init_x> <init_y> <final_x> <final_y>
+	end connection request/forfeit			|	forfeit <user_id>
 	end game (ckeck mate)					|	end_game <user>
 
 	
 server -> client : 
-	list with other users					|	av_users <file_descriptor> [<username>,<username>,<username>]
-	send color info							|	set_color <file_descriptor> <color> (1 for black / 0 for white)
-	game request/confirmation/decline		|	game_request <file_descriptor> <response> (0 for decline | 1 for accept | 2 for request) <user> (for request)
-	game info (move to be made) : A 1 A 4	|	make_move <file_descriptor> <init_x> <init_y> <final_x> <final_y>
-	disconcetion error (from oponent)		|	player_left <file_descriptor> <usernameP2>
-	illegal move							|	illegal_move <file_descriptor>
+	list with other users					|	av_users <user_id> [<username>,<username>,<username>]
+	send color info							|	set_color <user_id> <color> (1 for black / 0 for white)
+	game request/confirmation/decline		|	game_request <user_id> <response> (0 for decline | 1 for accept | 2 for request) <user> (for request)
+	game info (move to be made) : A 1 A 4	|	make_move <user_id> <init_x> <init_y> <final_x> <final_y>
+	disconcetion error (from oponent)		|	player_left <user_id> <usernameP2>
+	illegal move							|	illegal_move <user_id>
 	username ok								|	conn_init <response> (0 for decline | 1 for accept)

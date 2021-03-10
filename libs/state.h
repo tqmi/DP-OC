@@ -12,6 +12,7 @@
 
 #define DELETED 0
 #define ACTIVE  1
+#define PLAYING 2
 
 
 typedef struct user{

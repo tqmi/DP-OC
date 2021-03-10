@@ -38,30 +38,61 @@ void requestHandler(char request[], char *response, int fileDesc, int connection
 
     if(connection == 0)
     {
-       for(int i = 0 ; i < N_USERS ; ++i)
-       {
+        t_game * stopped_game = NULL;
+        
+        for(int i = 0 ; i < N_USERS ; ++i)
+        {
            if(get_user_fd(USERS[i]) == fileDesc)
            {
+               stopped_game = get_user_game(USERS[i]);
                set_state(USERS[i], DELETED);
+               
+               if(get_user_fd(get_black_player(stopped_game)) == fileDesc)
+               {
+                   set_state(get_user_from_fd(get_user_fd(get_white_player(stopped_game))), ACTIVE);
+               }
+               else
+               {
+                   set_state(get_user_from_fd(get_user_fd(get_black_player(stopped_game))), ACTIVE);
+               }
            }
-       }
+        }
+        
+        int blk_fd = get_user_fd(get_black_player(stopped_game));
+        int wht_fd = get_user_fd(get_white_player(stopped_game));
+        char * blk_username = get_username(get_black_player(stopped_game));
+        char * wht_username = get_username(get_white_player(stopped_game));
 
-       for(int i = 0 ; i < N_GAMES ; ++i)
-       {   
-           printf("%d %s %s\n",i,get_username(get_white_player(GAMES[i])),get_username(get_black_player(GAMES[i])));
-           if(get_user_fd(get_white_player(GAMES[i])) == fileDesc)
-           {
-               // white player disconnected
-               compose_message(msg, MV_PLAYER_LEFT, SERVER_ID, get_username(get_white_player(GAMES[i])));
-               write_data(get_user_fd(get_black_player(GAMES[i])), msg);
-           }
-           else if(get_user_fd(get_black_player(GAMES[i])) == fileDesc)
-           {
-               // black player disconnected
-               compose_message(msg, MV_PLAYER_LEFT, SERVER_ID, get_username(get_black_player(GAMES[i])));
-               write_data(get_user_fd(get_white_player(GAMES[i])), msg);
-           }
-       }
+        free(stopped_game);
+        
+        printf("%s %s\n",wht_username,blk_username);
+        if(wht_fd == fileDesc)
+        {
+            // white player disconnected
+            compose_message(msg, MV_PLAYER_LEFT, SERVER_ID, wht_username);
+            write_data(blk_fd, msg);
+        }
+        else if(blk_fd == fileDesc)
+        {
+            // black player disconnected
+            compose_message(msg, MV_PLAYER_LEFT, SERVER_ID, blk_username);
+            write_data(wht_fd, msg);
+        }
+
+        for (int  i = 0 ; i < N_GAMES ; ++i)
+        {
+            if((get_state(get_white_player(GAMES[i])) == DELETED) || (get_state(get_black_player(GAMES[i])) == DELETED))
+            {
+                free(GAMES[i]);
+                for(int j = i ; j < (N_GAMES - 1) ; ++j)
+                {
+                    GAMES[j] = GAMES[j + 1];
+                }
+
+                N_GAMES--;
+                break;
+            }
+        }
     }
 
     switch (decompose_message(request, user, payload))
@@ -225,6 +256,7 @@ void create_game(int fd1, int fd2){
         if(get_user_fd(USERS[i]) == fd1 || get_user_fd(USERS[i]) == fd2){
             u1 = u2;
             u2 = USERS[i];
+            set_state(USERS[i], PLAYING);
         }
     }
     int free_slot = N_GAMES;

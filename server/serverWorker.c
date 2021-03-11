@@ -63,6 +63,7 @@ void requestHandler(char request[], int fileDesc, int connection)
         }
 
         set_state(discU,DELETED);
+        return;
     }
 
     switch (decompose_message(request, user, payload))

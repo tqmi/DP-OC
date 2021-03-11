@@ -1,5 +1,5 @@
 client -> server :
-	username -> connection init				|	conn_init <user_id> <username>
+	username -> connection init				|	conn_init <user_id>
 	ask for eligible users to play with		|	av_users <user_id>
 	which player you wanna play with		|	play_with <user_id> <username>
 	game request/confirmation/decline		|	game_request <user_id> <response> (0 for decline | 1 for accept | 2 for request)

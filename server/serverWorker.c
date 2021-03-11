@@ -44,7 +44,7 @@ void requestHandler(char request[], int fileDesc, int connection)
     {
 
         t_user * discU = get_user_from_fd(fileDesc);
-
+        if (discU == NULL) return;
         if(get_state(discU) == PLAYING){
             t_game * stopped_game = get_user_game(discU);
             t_user * otherU = NULL;

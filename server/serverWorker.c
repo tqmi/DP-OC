@@ -119,9 +119,14 @@ void requestHandler(char request[], int fileDesc, int connection)
                 if(get_state(u) != PLAYING || get_turn(get_user_game(u)) != 0)
                     return;
                 
+                
                 t_game * game = get_user_game(u);
                 compose_message(msg,MV_GAME_REQ,SERVER_ID,"0");
-                
+
+                set_state(get_white_player(game),ACTIVE);
+                set_state(get_black_player(game),ACTIVE);
+
+
                 write_data(get_user_fd(get_black_player(game)),msg);
                 write_data(get_user_fd(get_white_player(game)),msg);
 
